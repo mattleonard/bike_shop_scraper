@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(version: 20140305045217) do
   create_table "processed_items", force: true do |t|
     t.string   "name"
     t.integer  "stock"
+    t.integer  "price"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

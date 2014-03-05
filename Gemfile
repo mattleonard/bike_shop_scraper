@@ -27,8 +27,8 @@ gem 'turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 1.2'
 
-# Nokogiri for webscraping
-gem 'nokogiri'
+# Mechanize for webscraping
+gem 'mechanize'
 
 # To store encrypted passwords
 gem 'sekrets'

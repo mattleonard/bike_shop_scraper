@@ -3,6 +3,7 @@ class CreateProcessedItems < ActiveRecord::Migration
     create_table :processed_items do |t|
       t.string :name
       t.integer :stock
+      t.integer :price
 
       t.timestamps
     end
