@@ -1,0 +1,29 @@
+#! /usr/bin/env ruby
+
+require 'pathname'
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path("../../Gemfile",
+  Pathname.new(__FILE__).realpath)
+
+require 'rubygems'
+require 'bundler/setup'
+        
+dirname = File.dirname(__FILE__)
+
+root = File.dirname(dirname)
+
+ciphertext = File.expand_path('ciphertext', dirname)
+
+case ARGV.size
+  when 0
+    ENV['SEKRETS_ARGV'] = "edit #{ ciphertext }"
+  when 1
+    ENV['SEKRETS_ARGV'] = "#{ ARGV[0] } #{ ciphertext }"
+end
+
+key = File.join(root, '.sekrets.key')
+
+if test(?s, key)
+  ENV['SEKRETS_KEY'] = IO.binread(key).strip
+end
+
+exec(Gem.bin_path('sekrets', 'sekrets'))
