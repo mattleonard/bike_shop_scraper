@@ -29,6 +29,7 @@ gem 'jbuilder', '~> 1.2'
 
 # Mechanize for webscraping
 gem 'mechanize'
+gem 'nokogiri'
 
 # To store encrypted passwords
 gem 'sekrets'

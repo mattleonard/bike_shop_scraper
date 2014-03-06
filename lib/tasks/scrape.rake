@@ -1,7 +1,12 @@
 require 'mechanize'
+require 'nokogiri'
+require 'open-uri'
 
 namespace :scrape do
-	task :bti do
+	task :bti => :environment do
+
+		puts "------------------------ Updating Products ------------------------"
+
 		login = Sekrets.settings_for(Rails.root.join('sekrets', 'ciphertext'))
 
 		a = Mechanize.new
@@ -16,15 +21,51 @@ namespace :scrape do
 		login_form['user[password]'] = login[:pass]
 		page = a.submit(login_form)
 
-		['8A501524', 'RS9618'].each do |bti_code|
-			page = a.get("https://bti-usa.com/public/item/#{bti_code}")
+		BtiItem.alphabetical.each do |bti_item|
+			page = a.get("https://bti-usa.com/public/item/#{bti_item.bti_id}")
 			
-			item_text = page.search(".itemTable").text
+			raw_xml = page.parser
+			title_bar = raw_xml.css("h3")
+			name = parse_noko(title_bar).gsub("\"", "")
+			tds = raw_xml.css("div#bodyDiv").css("td")
 
-			p item_text
+			prices = []
+			stock = 0
 
-			prices = item_text.gsub(',', '').scan(/\$\d*.../)
-			p prices.take(2)
+			(0..100).to_a.each do |i|
+				unless tds[i].nil?
+					parsed_item = parse_noko(tds[i])
+					
+					case parsed_item
+					when "price:"
+						prices << parse_noko(tds[i+1], true).to_f
+					when "onsale!"
+						prices << parse_noko(tds[i+1], true).to_f
+					when "MSRP:"
+						prices << parse_noko(tds[i+1], true).to_f
+					when "remaining:"
+						stock = parse_noko(tds[i+1], true).to_i
+					end
+				end
+			end
+
+			bti_item.name = name
+			bti_item.min_price = prices.min
+			bti_item.stock = stock
+			bti_item.save
+
+			puts "  * #{name}\n"
+			puts "  *** Price - #{prices.min}\n"
+			puts "  *** Stock - #{stock}\n"
+			puts "\n"
 		end
+	end
+
+	def parse_noko(raw, with_spaces = false)
+		raw_text = raw.text
+		if with_spaces
+			raw_text = raw_text.gsub(" ", "")
+		end
+		raw_text.gsub("\r", "").gsub("\n","").gsub("\t","").gsub("$","").gsub(",","")
 	end
 end
