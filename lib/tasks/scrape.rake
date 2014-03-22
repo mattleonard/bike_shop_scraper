@@ -15,7 +15,7 @@ namespace :scrape do
 
 			puts "------------------------ Updating Catalog -------------------------"
 
-			(1..6300).to_a.each do |page_num|
+			(1..1300).to_a.each do |page_num|
 				pool.process {
 					puts "Processing Page #{page_num}"
 					page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
