@@ -1,10 +1,14 @@
 require 'mechanize'
 require 'nokogiri'
 require 'open-uri'
+require 'thread/pool'
+N = 16
 
 namespace :scrape do
 	namespace :bti do
 		task :update_catalog => :environment do
+			pool = Thread.pool(N)
+
 			a = Mechanize.new
 
 			page = login(a)
@@ -12,21 +16,22 @@ namespace :scrape do
 			puts "------------------------ Updating Catalog -------------------------"
 
 			(1..6300).to_a.each do |page_num|
-				puts "Loading Page #{page_num}"
-				page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
+				pool.process {
+					puts "Processing Page #{page_num}"
+					page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
 
-				raw_xml = page.parser
+					raw_xml = page.parser
 
-				itemIDs = raw_xml.css('.itemLink')
+					itemIDs = raw_xml.css('.itemLink')
 
-				puts itemIDs.count
-
-				itemIDs.each do |item|
-					bti_id = item.text.gsub('-','')
-					BtiItem.where(bti_id: bti_id).first_or_create
-				end
-				puts BtiItem.count
+					itemIDs.each do |item|
+						bti_id = item.text.gsub('-','')
+						BtiItem.where(bti_id: bti_id).first_or_create
+					end
+				}
 			end
+
+			pool.shutdown
 		end
 
 		task :update_stock => :environment do
