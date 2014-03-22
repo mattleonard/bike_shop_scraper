@@ -48,6 +48,9 @@ gem 'thread'
 # Added for heroku
 gem 'rails_12factor'
 
+# Added for new relic on heroku
+gem 'newrelic_rpm'
+
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false
