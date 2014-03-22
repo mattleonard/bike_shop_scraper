@@ -15,8 +15,6 @@ namespace :scrape do
 				puts "Loading Page #{page_num}"
 				page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
 
-				sleep 1
-
 				raw_xml = page.parser
 
 				itemIDs = raw_xml.css('.itemLink')
