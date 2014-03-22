@@ -45,6 +45,9 @@ gem 'httparty'
 # Added threads to scraping rake tasks
 gem 'thread'
 
+# Added for heroku
+gem 'rails_12factor'
+
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false
