@@ -42,6 +42,7 @@ namespace :scrape do
 			page = login(a)
 
 			puts "------------------------ Updating Products ------------------------"
+			p BtiItem.count
 			BtiItem.alphabetical.each do |bti_item|
 				pool.process {
 					page = a.get("https://bti-usa.com/public/item/#{bti_item.bti_id}")
@@ -82,6 +83,7 @@ namespace :scrape do
 					puts "\n"
 				}
 			end
+			pool.shutdown
 		end
 	end
 
