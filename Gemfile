@@ -14,9 +14,6 @@ gem 'sass-rails', '~> 4.0.0'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 
-# Bootstrap for rails
-gem 'bootstrap-sass'
-
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 
@@ -51,6 +48,10 @@ gem 'newrelic_rpm'
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false
+end
+
+group :development do
+  gem 'xray-rails'
 end
 
 # Use ActiveModel has_secure_password

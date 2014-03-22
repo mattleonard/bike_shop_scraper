@@ -34,7 +34,7 @@ namespace :scrape do
 			pool.shutdown
 		end
 
-		task :update_stock => :environment do
+		task :update_stock_all => :environment do
 			pool = Thread.pool(N)
 
 			a = Mechanize.new
@@ -44,6 +44,57 @@ namespace :scrape do
 			puts "------------------------ Updating Products ------------------------"
 			p BtiItem.count
 			BtiItem.alphabetical.each do |bti_item|
+				pool.process {
+					page = a.get("https://bti-usa.com/public/item/#{bti_item.bti_id}")
+					
+					raw_xml = page.parser
+					title_bar = raw_xml.css("h3")
+					name = parse_noko(title_bar).gsub("\"", "")
+					tds = raw_xml.css("div#bodyDiv").css("td")
+
+					prices = []
+					stock = 0
+
+					(0..100).to_a.each do |i|
+						unless tds[i].nil?
+							parsed_item = parse_noko(tds[i])
+							
+							case parsed_item
+							when "price:"
+								prices << parse_noko(tds[i+1], true).to_f
+							when "onsale!"
+								prices << parse_noko(tds[i+1], true).to_f
+							when "MSRP:"
+								prices << parse_noko(tds[i+1], true).to_f
+							when "remaining:"
+								stock = parse_noko(tds[i+1], true).to_i
+							end
+						end
+					end
+
+					bti_item.name = name
+					bti_item.min_price = prices.min
+					bti_item.stock = stock
+					bti_item.save
+
+					puts "  * #{name}\n"
+					puts "  *** Price - #{prices.min}\n"
+					puts "  *** Stock - #{stock}\n"
+					puts "\n"
+				}
+			end
+			pool.shutdown
+		end
+
+		task :update_stock_new => :environment do
+			pool = Thread.pool(N)
+
+			a = Mechanize.new
+
+			page = login(a)
+
+			puts "------------------------ Updating Products ------------------------"
+			BtiItem.where('name IS NULL').each do |bti_item|
 				pool.process {
 					page = a.get("https://bti-usa.com/public/item/#{bti_item.bti_id}")
 					
