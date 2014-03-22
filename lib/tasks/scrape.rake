@@ -3,61 +3,78 @@ require 'nokogiri'
 require 'open-uri'
 
 namespace :scrape do
-	task :bti => :environment do
+	namespace :bti do
+		task :update_catalog => :environment do
+			a = Mechanize.new
 
-		puts "------------------------ Updating Products ------------------------"
+			page = login(a)
 
-		login = Sekrets.settings_for(Rails.root.join('sekrets', 'ciphertext'))
+			puts "------------------------ Updating Catalog -------------------------"
 
-		a = Mechanize.new
+			(1..1300).to_a.each do |page_num|
+				puts "Loading Page #{page_num}"
+				page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
 
-		page = a.get('https://bti-usa.com/public/login')
+				sleep 1
 
-		page = page.link_with(:text => "login").click
-		
-		login_form = page.form_with(:action => '/public/login')
-		login_form['user[customer_id]'] = login[:cust_id]
-		login_form['user[user_name]'] = login[:u_name]
-		login_form['user[password]'] = login[:pass]
-		page = a.submit(login_form)
+				raw_xml = page.parser
 
-		BtiItem.alphabetical.each do |bti_item|
-			page = a.get("https://bti-usa.com/public/item/#{bti_item.bti_id}")
-			
-			raw_xml = page.parser
-			title_bar = raw_xml.css("h3")
-			name = parse_noko(title_bar).gsub("\"", "")
-			tds = raw_xml.css("div#bodyDiv").css("td")
+				itemIDs = raw_xml.css('.itemLink')
 
-			prices = []
-			stock = 0
+				puts itemIDs.count
 
-			(0..100).to_a.each do |i|
-				unless tds[i].nil?
-					parsed_item = parse_noko(tds[i])
-					
-					case parsed_item
-					when "price:"
-						prices << parse_noko(tds[i+1], true).to_f
-					when "onsale!"
-						prices << parse_noko(tds[i+1], true).to_f
-					when "MSRP:"
-						prices << parse_noko(tds[i+1], true).to_f
-					when "remaining:"
-						stock = parse_noko(tds[i+1], true).to_i
+				itemIDs.each do |item|
+					bti_id = item.text.gsub('-','')
+					BtiItem.where(bti_id: bti_id).first_or_create
+				end
+				puts BtiItem.count
+			end
+		end
+
+		task :update_stock => :environment do
+			a = Mechanize.new
+
+			page = login(a)
+
+			puts "------------------------ Updating Products ------------------------"
+			BtiItem.alphabetical.each do |bti_item|
+				page = a.get("https://bti-usa.com/public/item/#{bti_item.bti_id}")
+				
+				raw_xml = page.parser
+				title_bar = raw_xml.css("h3")
+				name = parse_noko(title_bar).gsub("\"", "")
+				tds = raw_xml.css("div#bodyDiv").css("td")
+
+				prices = []
+				stock = 0
+
+				(0..100).to_a.each do |i|
+					unless tds[i].nil?
+						parsed_item = parse_noko(tds[i])
+						
+						case parsed_item
+						when "price:"
+							prices << parse_noko(tds[i+1], true).to_f
+						when "onsale!"
+							prices << parse_noko(tds[i+1], true).to_f
+						when "MSRP:"
+							prices << parse_noko(tds[i+1], true).to_f
+						when "remaining:"
+							stock = parse_noko(tds[i+1], true).to_i
+						end
 					end
 				end
+
+				bti_item.name = name
+				bti_item.min_price = prices.min
+				bti_item.stock = stock
+				bti_item.save
+
+				puts "  * #{name}\n"
+				puts "  *** Price - #{prices.min}\n"
+				puts "  *** Stock - #{stock}\n"
+				puts "\n"
 			end
-
-			bti_item.name = name
-			bti_item.min_price = prices.min
-			bti_item.stock = stock
-			bti_item.save
-
-			puts "  * #{name}\n"
-			puts "  *** Price - #{prices.min}\n"
-			puts "  *** Stock - #{stock}\n"
-			puts "\n"
 		end
 	end
 
@@ -67,5 +84,22 @@ namespace :scrape do
 			raw_text = raw_text.gsub(" ", "")
 		end
 		raw_text.gsub("\r", "").gsub("\n","").gsub("\t","").gsub("$","").gsub(",","")
+	end
+
+	def login(mech)
+		puts "------------------------ Logging In -------------------------------"
+
+		login = Sekrets.settings_for(Rails.root.join('sekrets', 'ciphertext'))
+
+		page = mech.get('https://bti-usa.com/public/login')
+
+		page = page.link_with(:text => "login").click
+		
+		login_form = page.form_with(:action => '/public/login')
+		login_form['user[customer_id]'] = login[:cust_id]
+		login_form['user[user_name]'] = login[:u_name]
+		login_form['user[password]'] = login[:pass]
+		page = mech.submit(login_form)
+		page
 	end
 end

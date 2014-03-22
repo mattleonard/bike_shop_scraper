@@ -31,8 +31,14 @@ gem 'jbuilder', '~> 1.2'
 gem 'mechanize'
 gem 'nokogiri'
 
+# For ebay api
+gem 'ebayapi'
+
 # To store encrypted passwords
 gem 'sekrets'
+
+# Used for interacting with APIs
+gem 'httparty'
 
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
