@@ -10,8 +10,12 @@
 
 	<%= render partial: '/header' %>
 
-	<p class="notice"><%= notice %></p>
-	<p class="alert"><%= alert %></p>
+	<% if notice or alert %>
+		<div class="application-container">
+			<p class="notice"><%= notice %></p>
+			<p class="alert"><%= alert %></p>
+		</div>
+	<% end %>
 
 	<%= yield %>
 

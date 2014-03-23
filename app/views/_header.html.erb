@@ -1,4 +1,4 @@
- <div class="navbar" role="navigation">
+ <div class="navbar navbar-default navbar-static-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -9,11 +9,16 @@
       </button>
       <a class="navbar-brand" href="/">BTI API</a>
     </div>
-    <div class="collapse navbar-collapse right">
-      <ul class="nav navbar-nav">
-        <li><a href="/documentation">Documentaion</a></li>
-        <li><a href="/account">Register / Sign In</a></li>
-        <li><a href="#contact">Contact</a></li>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li class="<%= @current_tab == 'home' ? 'active' : '' %>"><a href="/">Home</a></li>
+        <li class="<%= @current_tab == 'documentation' ? 'active' : '' %>"><a href="/documentation">Documentation</a></li>
+        <li class="<%= @current_tab == 'contact' ? 'active' : '' %>"><a href="/contact">Contact</a></li>
+        <% if @user %>
+          <li class=""><%= link_to "Sign out", destroy_user_session_path, :method => :delete %></li>
+        <% else %>
+          <li class=""><a href="/account">Register / Sign In</a></li>
+        <% end %>
       </ul>
     </div>
   </div>

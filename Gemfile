@@ -45,6 +45,9 @@ gem 'newrelic_rpm'
 # Add auth for users
 gem 'devise'
 
+# For contact form
+gem 'contact_us'
+
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false

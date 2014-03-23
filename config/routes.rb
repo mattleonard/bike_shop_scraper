@@ -11,6 +11,7 @@ BtiScraper::Application.routes.draw do
 
   resources :users
   get '/documentation', to: 'public#documentation'
+  get '/contact', to: 'public#contact'
   get '/account', to: 'user#show'
   get '/user/regen_key', to: 'user#regen_key'
 
