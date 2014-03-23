@@ -4,6 +4,9 @@ module Api
 			before_filter :restrict_access
 			respond_to :json
 
+			# How to call:
+			# curl http://localhost:3000/api/v1/products -H 'Authorization: Token token=''"
+
 			def index
 				respond_with Product.all
 			end
