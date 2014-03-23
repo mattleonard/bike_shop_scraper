@@ -1,4 +1,4 @@
-class BtiItem < ActiveRecord::Base
+class Product < ActiveRecord::Base
 	 validates :bti_id, presence: true
 	 validates :bti_id, uniqueness: true
 

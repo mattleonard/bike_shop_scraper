@@ -26,7 +26,7 @@ namespace :scrape do
 
 					itemIDs.each do |item|
 						bti_id = item.text.gsub('-','')
-						BtiItem.where(bti_id: bti_id).first_or_create
+						Product.where(bti_id: bti_id).first_or_create
 					end
 				}
 			end
@@ -42,8 +42,8 @@ namespace :scrape do
 			page = login(a)
 
 			puts "------------------------ Updating Products ------------------------"
-			p BtiItem.count
-			BtiItem.alphabetical.each do |bti_item|
+			p Product.count
+			Product.alphabetical.each do |bti_item|
 				pool.process {
 					page = a.get("https://bti-usa.com/public/item/#{bti_item.bti_id}")
 					
@@ -94,7 +94,7 @@ namespace :scrape do
 			page = login(a)
 
 			puts "------------------------ Updating Products ------------------------"
-			BtiItem.where('name IS NULL').each do |bti_item|
+			Product.where('name IS NULL').each do |bti_item|
 				pool.process {
 					page = a.get("https://bti-usa.com/public/item/#{bti_item.bti_id}")
 					
