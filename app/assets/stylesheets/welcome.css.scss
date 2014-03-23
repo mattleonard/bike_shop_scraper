@@ -21,13 +21,18 @@
 }
 
 .welcome-container {
-
+	max-width: 1110px;
+	margin: 10% auto 0 auto;
+	padding: 15px;
 }
 
 .welcome-textbox {
 	position: relative;
-	width: 400px;
+	width: 40%;
 	height: 600px;
 	z-index: 200;
+	font-size: 3.0em;
 	color: #fff;
+	line-height: 150%;
+	font-weight: 100;
 }
