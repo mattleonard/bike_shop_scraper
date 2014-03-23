@@ -8,9 +8,9 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
 
-  attr_encrpyted :bti_customer_number, :key => :encryption_key
-  attr_encrpyted :bti_uname, :key => :encryption_key
-  attr_encrpyted :bti_pass, :key => :encryption_key
+  attr_encrypted :bti_customer_number, :key => :encryption_key
+  attr_encrypted :bti_uname, :key => :encryption_key
+  attr_encrypted :bti_pass, :key => :encryption_key
 
   has_one :api_key
 
