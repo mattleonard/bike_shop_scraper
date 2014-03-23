@@ -16,5 +16,18 @@
 
 	video {
 		width: 100%;
+		z-index: -10;
 	}
+}
+
+.welcome-container {
+
+}
+
+.welcome-textbox {
+	position: relative;
+	width: 400px;
+	height: 600px;
+	z-index: 200;
+	color: #fff;
 }
