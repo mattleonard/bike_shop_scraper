@@ -1,0 +1,7 @@
+<div class="user-container">
+	<h3>Welcome <%= @user.email %></h3>
+
+	<h4>Api Key: Still in dev<%#= @user.api_key.nil? ? 'None' : @user.api_key.access_token %></h4>
+
+		<%= link_to 'Generate A New Key', user_regen_key_path() %>
+</div>

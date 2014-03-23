@@ -27,9 +27,6 @@ gem 'jbuilder', '~> 1.2'
 gem 'mechanize'
 gem 'nokogiri'
 
-# For ebay api
-gem 'ebayapi'
-
 # To store encrypted passwords
 gem 'sekrets'
 
@@ -44,6 +41,9 @@ gem 'rails_12factor'
 
 # Added for new relic on heroku
 gem 'newrelic_rpm'
+
+# Add auth for users
+gem 'devise'
 
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.

@@ -8,9 +8,12 @@
 </head>
 <body>
 
-<%= render partial: '/header' %>
+	<%= render partial: '/header' %>
 
-<%= yield %>
+	<p class="notice"><%= notice %></p>
+	<p class="alert"><%= alert %></p>
+
+	<%= yield %>
 
 </body>
 </html>
