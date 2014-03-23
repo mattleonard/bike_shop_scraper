@@ -8,6 +8,8 @@ BtiScraper::Application.routes.draw do
     end
   end
 
-  root 'welcome#index'
+  get '/documentation', to: 'public#documentation'
+
+  root 'public#index'
 
 end

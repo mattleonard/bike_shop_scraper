@@ -1,0 +1,28 @@
+<div class="doc-container">
+	<h1>REST API v1 Docs</h1>
+
+	<div class="doc-products">
+		<h4>Products</h4>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Action></th>
+					<th>Description</th>
+					<th>Example</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>GET /v1/products</td>
+					<td>Returns JSON of all BTI products</td>
+					<td>curl http://localhost:3000/api/v1/products -H 'Authorization: Token token='AUTH_TOKEN'"</td>
+				</tr>
+				<tr>
+					<td>GET /vi/products/:id</td>
+					<td>Returns the JSON object of the item with the given BTI id</td>
+					<td>curl http://localhost:3000/api/v1/products/4C501275 -H 'Authorization: Token token="AUTH_TOKEN"'</td>	
+				</tr>
+			</tbody>
+		</table>
+	<div>
+</div>

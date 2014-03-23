@@ -12,7 +12,7 @@ module Api
 			end
 
 			def show
-				respond_with Product.find(params[:id])
+				respond_with Product.where(bti_id: params[:id].gsub('-','')).first
 			end
 
 			private
