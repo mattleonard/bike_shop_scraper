@@ -14,50 +14,40 @@ namespace :scrape do
 
 			puts "------------------------ Getting Product Groups -------------------------"
 
-			page = a.get("https://bti-usa.com/public/quicksearch/+/?page=1")
+			(1..1300).to_a.each do |page_num|
+				puts "Scraping page #{page_num}"
 
-			raw_xml = page.parser
+				page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
 
-			groupIds = raw_xml.css('.groupRow')
+				raw_xml = page.parser
 
-			groupIds.each do |item|
-				bti_id = item.attributes.first.last.value.gsub('groupRow__num_','').gsub('groupRow_','')
-				ProductGroup.where(bti_id: bti_id).first_or_create
-			end
-		end
+				groupRows = raw_xml.css('.groupRow')
 
-		task :get_products => :environment do
+				groupRows.each do |item|
+					bti_id = item.attributes.first.last.value
+											 .gsub('groupItemsDiv__num_','')
+											 .gsub('groupItemsDiv_','')
+					pg = ProductGroup.where(bti_id: bti_id).first_or_create
+					pg.name = item.css('.groupTitleOpen').text
 
-			a = Mechanize.new
-
-			page = login(a)
-
-			ProductGroup.all.each do |pg|
-
-					puts "Updating #{pg.bti_id}"
-
-					page = a.get("https://bti-usa.com/public/quicksearch/#{pg.bti_id}")
-
-					raw_xml = page.parser
-
-					pg.name = raw_xml.css('.groupTitleOpen').text
+					p item.css('.groupTitleOpen').text
 
 					pg.description = ""
 
-					raw_xml.css('.groupBullets').css('li').each do |li|
+					item.css('.groupBullets').css('li').each do |li|
 				    pg.description += li.text + '. '
 				  end
 
-				  raw_xml.css('.itemNo').each do |itemNo|
+				  item.css('.itemNo').each do |itemNo|
 				  	bti_id = itemNo.css('a').text.gsub('-','')
 						product = Product.where(bti_id: bti_id).first_or_create
 						pg.products << product
 
 						page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
 
-						parse_product_price(page, product)
-
 						raw_xml = page.parser
+
+						parse_product_price(raw_xml, product)
 
 					  raw_xml.css('.itemSpecTable').css('tr').each do |variation|
 					  	key = variation.css('.specLabel').text
@@ -74,6 +64,7 @@ namespace :scrape do
 					  end
 				  end
 				  pg.save
+				end
 			end
 		end
 
@@ -98,15 +89,16 @@ namespace :scrape do
 				pool.process {
 					page = a.get("https://bti-usa.com/public/item/#{bti_item.bti_id}")
 					
-					parse_product_price(page, item)
+					raw_xml = page.parser
+
+					parse_product_price(raw_xml, item)
 				}
 			end
 			pool.shutdown
 		end
 	end
 
-	def parse_product_price(page, item)
-		raw_xml = page.parser
+	def parse_product_price(raw_xml, item)
 		title_bar = raw_xml.css("h3")
 		name = parse_noko(title_bar).gsub("\"", "")
 		tds = raw_xml.css("div#bodyDiv").css("td")
