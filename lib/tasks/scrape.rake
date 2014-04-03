@@ -38,31 +38,31 @@ namespace :scrape do
 				    pg.description += li.text + '. '
 				  end
 
-				  item.css('.itemNo').each do |itemNo|
-				  	bti_id = itemNo.css('a').text.gsub('-','')
-						product = Product.where(bti_id: bti_id).first_or_create
-						pg.products << product
+				  # item.css('.itemNo').each do |itemNo|
+				  # 	bti_id = itemNo.css('a').text.gsub('-','')
+						# product = Product.where(bti_id: bti_id).first_or_create
+						# pg.products << product
 
-						page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
+						# page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
 
-						raw_xml = page.parser
+						# raw_xml = page.parser
 
-						parse_product_price(raw_xml, product)
+						# parse_product_price(raw_xml, product)
 
-					  raw_xml.css('.itemSpecTable').css('tr').each do |variation|
-					  	key = variation.css('.specLabel').text
-					  	value = variation.css('.specData').text
+					 #  raw_xml.css('.itemSpecTable').css('tr').each do |variation|
+					 #  	key = variation.css('.specLabel').text
+					 #  	value = variation.css('.specData').text
 					  		
-					  	unless key == "" or value == "" or 
-					  				 key == "BTI part #:" or 
-					  				 key == "vendor part #:" or
-					  				 key == "UPC:"
-					  		variation = Variation.where(key: key.gsub(':',''), value: value, product_id: product.id)
-					  												 .first_or_create
-					  		product.variations << variation
-					  	end
-					  end
-				  end
+					 #  	unless key == "" or value == "" or 
+					 #  				 key == "BTI part #:" or 
+					 #  				 key == "vendor part #:" or
+					 #  				 key == "UPC:"
+					 #  		variation = Variation.where(key: key.gsub(':',''), value: value, product_id: product.id)
+					 #  												 .first_or_create
+					 #  		product.variations << variation
+					 #  	end
+					 #  end
+				  # end
 				  pg.save
 				end
 			end
