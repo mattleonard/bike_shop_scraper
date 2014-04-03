@@ -7,7 +7,6 @@ N = 16
 namespace :scrape do
 	namespace :bti do
 		task :get_product_groups => :environment do
-			pool = Thread.pool(N)
 
 			a = Mechanize.new
 
@@ -16,62 +15,57 @@ namespace :scrape do
 			puts "------------------------ Getting Product Groups -------------------------"
 
 			(1..1300).to_a.each do |page_num|
-				pool.process {
-				
-					puts "Scraping page #{page_num}"
+				puts "Scraping page #{page_num}"
 
-					page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
+				page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
 
-					raw_xml = page.parser
+				raw_xml = page.parser
 
-					groupRows = raw_xml.css('.groupRow')
+				groupRows = raw_xml.css('.groupRow')
 
-					groupRows.each do |item|
-						bti_id = item.attributes.first.last.value
-												 .gsub('groupItemsDiv__num_','')
-												 .gsub('groupItemsDiv_','')
-						pg = ProductGroup.where(bti_id: bti_id).first_or_create
-						pg.name = item.css('.groupTitleOpen').text
+				groupRows.each do |item|
+					bti_id = item.attributes.first.last.value
+											 .gsub('groupItemsDiv__num_','')
+											 .gsub('groupItemsDiv_','')
+					pg = ProductGroup.where(bti_id: bti_id).first_or_create
+					pg.name = item.css('.groupTitleOpen').text
 
-						puts "Updating #{pg.name} product group"
+					puts "Updating #{pg.name} product group"
 
-						pg.description = ""
+					pg.description = ""
 
-						item.css('.groupBullets').css('li').each do |li|
-					    pg.description += li.text + '. '
+					item.css('.groupBullets').css('li').each do |li|
+				    pg.description += li.text + '. '
+				  end
+
+				  item.css('.itemNo').each do |itemNo|
+				  	bti_id = itemNo.css('a').text.gsub('-','')
+						product = Product.where(bti_id: bti_id).first_or_create
+						pg.products << product
+
+						page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
+
+						raw_xml = page.parser
+
+						parse_product_price(raw_xml, product)
+
+					  raw_xml.css('.itemSpecTable').css('tr').each do |variation|
+					  	key = variation.css('.specLabel').text
+					  	value = variation.css('.specData').text
+					  		
+					  	unless key == "" or value == "" or 
+					  				 key == "BTI part #:" or 
+					  				 key == "vendor part #:" or
+					  				 key == "UPC:"
+					  		variation = Variation.where(key: key.gsub(':',''), value: value, product_id: product.id)
+					  												 .first_or_create
+					  		product.variations << variation
+					  	end
 					  end
-
-					  item.css('.itemNo').each do |itemNo|
-					  	bti_id = itemNo.css('a').text.gsub('-','')
-							product = Product.where(bti_id: bti_id).first_or_create
-							pg.products << product
-
-							page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
-
-							raw_xml = page.parser
-
-							parse_product_price(raw_xml, product)
-
-						  raw_xml.css('.itemSpecTable').css('tr').each do |variation|
-						  	key = variation.css('.specLabel').text
-						  	value = variation.css('.specData').text
-						  		
-						  	unless key == "" or value == "" or 
-						  				 key == "BTI part #:" or 
-						  				 key == "vendor part #:" or
-						  				 key == "UPC:"
-						  		variation = Variation.where(key: key.gsub(':',''), value: value, product_id: product.id)
-						  												 .first_or_create
-						  		product.variations << variation
-						  	end
-						  end
-					  end
-					  pg.save
-					end
-				}
+				  end
+				  pg.save
+				end
 			end
-
-			pool.shutdown
 		end
 
 		task :update_stock, [:type] => :environment do |task, args|
