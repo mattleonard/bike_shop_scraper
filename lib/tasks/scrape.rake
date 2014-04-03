@@ -38,10 +38,10 @@ namespace :scrape do
 				    pg.description += li.text + '. '
 				  end
 
-				  # item.css('.itemNo').each do |itemNo|
-				  # 	bti_id = itemNo.css('a').text.gsub('-','')
-						# product = Product.where(bti_id: bti_id).first_or_create
-						# pg.products << product
+				  item.css('.itemNo').each do |itemNo|
+				  	bti_id = itemNo.css('a').text.gsub('-','')
+						product = Product.where(bti_id: bti_id).first_or_create
+						pg.products << product
 
 						# page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
 
@@ -62,7 +62,7 @@ namespace :scrape do
 					 #  		product.variations << variation
 					 #  	end
 					 #  end
-				  # end
+				  end
 				  pg.save
 				end
 			end
