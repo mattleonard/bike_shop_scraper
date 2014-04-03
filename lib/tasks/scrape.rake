@@ -49,6 +49,8 @@ namespace :scrape do
 				}
 			end
 			pool.shutdown
+
+			Rake::Task["scrape:bti:update_stock"].execute
 		end
 
 		task :update_stock, [:type] => :environment do |task, args|
