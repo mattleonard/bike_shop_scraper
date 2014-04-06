@@ -88,7 +88,10 @@ namespace :scrape do
 
 				raw_xml = page.parser
 
+				category_name = raw_xml.css('.crumbs').css('a').first(2).last.text
+
 				pg = product.product_group
+				pg.category_id = Category.where(name: category_name).first_or_create.id
 				pg.brand = raw_xml.css('.headline').css('span').text
 				pg.save
 
