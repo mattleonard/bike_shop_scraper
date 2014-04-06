@@ -152,7 +152,7 @@ namespace :scrape do
 		item.save
 
 		puts "  * #{name}\n"
-		puts "  *** Price - #{sale != 0 ? sale : price}\n"
+		puts "  *** Price - #{price}\n"
 		puts "  *** Stock - #{stock}\n"
 		puts "\n"
 	end
