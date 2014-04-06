@@ -1,5 +1,5 @@
 class Category < ActiveRecord::Base
-	 has_many :product_groups, dependent: :destroy
+	 has_many :product_groups
 
 	 scope :alphabetical, -> { order(:name) }
 end
