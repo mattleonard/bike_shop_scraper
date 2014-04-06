@@ -1,6 +1,6 @@
 module Api
 	module V1
-		class ProductsController < ApplicationController
+		class ProductGroupsController < ApplicationController
 			before_filter :restrict_access
 			respond_to :json
 
