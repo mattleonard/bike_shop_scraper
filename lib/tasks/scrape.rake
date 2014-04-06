@@ -122,7 +122,9 @@ namespace :scrape do
 		name = parse_noko(title_bar).gsub("\"", "")
 		tds = raw_xml.css("div#bodyDiv").css("td")
 
-		prices = []
+		price = 0.0
+		msrp = 0.0
+		sale = 0.0
 		stock = 0
 
 		(0..100).to_a.each do |i|
@@ -131,11 +133,11 @@ namespace :scrape do
 				
 				case parsed_item
 				when "price:"
-					prices << parse_noko(tds[i+1], true).to_f
+					price = parse_noko(tds[i+1], true).to_f
 				when "onsale!"
-					prices << parse_noko(tds[i+1], true).to_f
+					sale = parse_noko(tds[i+1], true).to_f
 				when "MSRP:"
-					prices << parse_noko(tds[i+1], true).to_f
+					msrp = parse_noko(tds[i+1], true).to_f
 				when "remaining:"
 					stock = parse_noko(tds[i+1], true).to_i
 				end
@@ -143,12 +145,14 @@ namespace :scrape do
 		end
 
 		item.name = name
-		item.min_price = prices.min
+		item.msrp_price = msrp
+		item.sale_price = sale
+		item.regular_price = price
 		item.stock = stock
 		item.save
 
 		puts "  * #{name}\n"
-		puts "  *** Price - #{prices.min}\n"
+		puts "  *** Price - #{sale ? sale : msrp}\n"
 		puts "  *** Stock - #{stock}\n"
 		puts "\n"
 	end
