@@ -8,7 +8,7 @@ module Api
 			# curl http://localhost:3000/api/v1/products -H 'Authorization: Token token=''"
 
 			def index
-				products = Product.offset(params[:offset]).limit(3000)
+				products = Product.offset(params[:offset]).limit(100)
 				products.each do |p|
 					p.name = p.variations.map{|v| v.value}.join(', ')
 				end
