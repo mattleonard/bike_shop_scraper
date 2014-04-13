@@ -95,6 +95,9 @@ namespace :scrape do
 				pg.brand = raw_xml.css('.headline').css('span').text
 				pg.save
 
+				image_url = raw_xml.css(".itemTable").css("img")[1].attributes["src"].value.gsub('thumbnails/large', 'pictures')
+
+				product.photo_url = "https://bti-usa.com" + image_url
 				product.model = pg.name.gsub(pg.brand, '')
 				product.save
 
