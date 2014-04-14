@@ -6,7 +6,7 @@ namespace :shopify do
 			create_categories()
 
 			ProductGroup.all.each do |pg|
-				if pg.products.pluck(:stock).any? {|s| s != 0}
+				if pg.products.active.pluck(:stock).any? {|s| s != 0}
 					sleep 0.5
 					create_shopify_product(pg)
 				end
