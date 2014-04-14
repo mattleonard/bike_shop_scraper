@@ -47,17 +47,26 @@ namespace :shopify do
 	def create_shopify_product(pg)
 		p "Adding #{pg.name}"
 
+		# Creating inital product
 		shop_prod = ShopifyAPI::Product.new
 		shop_prod.title = pg.name
 		shop_prod.body_html = pg.description
 		shop_prod.vendor = pg.brand
-		shop_prod.product_type = Category.find(pg.category_id).name
+		category = Category.find(pg.category_id).name
+		shop_prod.product_type = category
 		shop_prod.published_scope = "global"
 
 		shop_prod.save
 
+		# Connects collections
+	  collect = ShopifyAPI::Collect.new
+	  collect.product_id = shop_prod.id
+	  collect.collection_id = ShopifyAPI::CustomCollection.where(title: category).first.id
+	 	collect.save
+
 		products = pg.products
 
+		# Creates variations for products
 		products.first.variations.where("key != 'model'").each_with_index do |v, index|
 			if index == 0
 				shop_prod.options.first.name = v.key.titleize
@@ -66,6 +75,7 @@ namespace :shopify do
 			end
 		end
 
+		# Added variation details
 		products.each_with_index do |prod, index|
 			variations = prod.variations.where("key != 'model'")
 
@@ -101,6 +111,7 @@ namespace :shopify do
 
 	 	variants = shop_prod.variants
 
+	 	# Sets shopify id for variations
 	 	variants.each_with_index do |v, i|
 	 		product = products[i]
 	 		product.shopify_id = v.id
