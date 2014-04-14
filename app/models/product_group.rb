@@ -7,4 +7,11 @@ class ProductGroup < ActiveRecord::Base
 	 has_many :products, dependent: :destroy
 
 	 scope :alphabetical, -> { order(:name) }
+
+	 
+	 state_machine :status, initial: :active do
+	 	event :archive do
+	 		transition :active => :archived
+	 	end
+	 end
 end

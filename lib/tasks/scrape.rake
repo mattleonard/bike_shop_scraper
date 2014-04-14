@@ -62,20 +62,12 @@ namespace :scrape do
 
 			items = 
 				if args.type == "new"
-					Product.where('name IS NULL')
+					Product.where('name IS NULL').active
 				else
-					Product.all
+					Product.active
 				end
 
 			update_products(a, items)
-
-			# while !Product.where('name IS NULL').empty?
-			# 	sleep 5
-			# 	items = Product.where('name IS NULL')
-			# 	puts "Running again"
-			# 	puts "#{items.count}"
-			# 	update_products(a, items)
-			# end
 		end
 	end
 
@@ -87,6 +79,10 @@ namespace :scrape do
 				page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
 
 				raw_xml = page.parser
+
+				if raw_xml.css("#errorCell").any?
+					product.archive
+				end
 
 				category_name = raw_xml.css('.crumbs').css('a').first(2).last.text
 

@@ -7,4 +7,12 @@ class Product < ActiveRecord::Base
 	 has_many :variations, dependent: :destroy
 
 	 scope :alphabetical, -> { order(:name) }
+	 scope :active, -> { where(status: "active") }
+
+	 state_machine :status, initial: :active do
+	 	event :archive do
+	 		transition :active => :archived
+	 	end
+	 end
+
 end

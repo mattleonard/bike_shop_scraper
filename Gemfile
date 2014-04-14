@@ -51,6 +51,12 @@ gem 'contact_us'
 # Encrpyt db fields
 gem 'attr_encrypted'
 
+# Shopify API
+gem 'shopify_api'
+
+# State machine
+gem 'state_machine'
+
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false

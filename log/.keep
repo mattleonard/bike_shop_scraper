@@ -1,0 +1,13 @@
+
+
+namespace :bti do
+	task :get_product_groups => :environment do
+
+
+	end
+
+
+	def setup_auth
+
+	end
+end
