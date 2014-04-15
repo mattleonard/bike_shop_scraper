@@ -63,7 +63,7 @@ namespace :shopify do
 			add_image(shop_prod_id, pg.products.first)
 		end
 		
-		pg.products.each_with_index do |product, index|
+		pg.products.complete.each_with_index do |product, index|
 			check_limit()
 			variant_id = add_variation(shop_prod_id, product, index)
 			if all_images

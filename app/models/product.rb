@@ -8,6 +8,8 @@ class Product < ActiveRecord::Base
 
 	 scope :alphabetical, -> { order(:name) }
 	 scope :active, -> { where(status: "active") }
+	 scope :complete, -> { where('regular_price IS NOT NULL').
+	 											 where('photo_url IS NOT NULL') }
 
 	 state_machine :status, initial: :active do
 	 	event :archive do
