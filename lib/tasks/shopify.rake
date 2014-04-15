@@ -142,7 +142,7 @@ namespace :shopify do
 		shop_prod.variants << variant
 
 		p shop_prod.save
-		p shop_prod.full_messages
+		p shop_prod.errors.full_messages
 	end
 
 	def add_image(shop_prod_id, product)
