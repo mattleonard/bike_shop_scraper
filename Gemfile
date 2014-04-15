@@ -53,6 +53,7 @@ gem 'attr_encrypted'
 
 # Shopify API
 gem 'shopify_api'
+gem "shopify-api-limits"
 
 # State machine
 gem 'state_machine'

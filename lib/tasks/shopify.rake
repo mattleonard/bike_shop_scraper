@@ -7,7 +7,7 @@ namespace :shopify do
 
 			ProductGroup.all.each do |pg|
 				if pg.products.active.pluck(:stock).any? {|s| s != 0}
-					sleep 0.5
+
 					create_shopify_product(pg)
 				end
 			end
@@ -49,20 +49,17 @@ namespace :shopify do
 		p "Adding #{pg.name} -----------------------------------"
 
 		shop_prod_id = initial_product(pg)
-		sleep 1
+		check_limit()
 		place_in_collection(shop_prod_id, pg)
-		sleep 1
+		check_limit()
 		create_options(shop_prod_id, pg)
-		sleep 1
+		check_limit()
 		
 		pg.products.each_with_index do |product, index|
-			sleep 1
+			check_limit()
 			variant_id = add_variation(shop_prod_id, product, index)
-			sleep 1
 			add_image(shop_prod_id, product)
-			sleep 1
 			product.shopify_id = ShopifyAPI::Variant.last.id
-			sleep 1
 			product.save
 		end
 	end
@@ -158,5 +155,16 @@ namespace :shopify do
 		image.src = product.photo_url
 		shop_prod.images << image
 		shop_prod.save
+	end
+
+	def check_limit
+		if ShopifyAPI.credit_left <= 10
+			p ""
+			p "Credit left #{ShopifyAPI.credit_left}"
+			p "Waiting for API Bucket to empty"
+			p ""
+
+			sleep 5 
+		end
 	end
 end
