@@ -51,6 +51,7 @@ namespace :shopify do
 		shop_prod_id = initial_product(pg)
 		place_in_collection(shop_prod_id, pg)
 		create_options(shop_prod_id, pg)
+		
 		pg.products.each_with_index do |product, index|
 			variant_id = add_variation(shop_prod_id, product, index)
 			add_image(shop_prod_id, product)
@@ -70,25 +71,25 @@ namespace :shopify do
 		shop_prod.product_type = category
 		shop_prod.published_scope = "global"
 
-		p shop_prod.save
-		p shop_prod.errors.full_messages
+		shop_prod.save
+
+		return shop_prod
 	end
 
 	def place_in_collection(shop_prod_id, product_group)
 		p "Placing product in collection"
 
 		category = Category.find(product_group.category_id).name
-		shop_prod = ShopifyAPI::Product.last
+		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
 	  collect = ShopifyAPI::Collect.new
 	  collect.product_id = shop_prod.id
 	  collect.collection_id = ShopifyAPI::CustomCollection.where(title: category).first.id
-	 	p collect.save
-	 	p collect.errors.full_messages
+	 	collect.save
 	end
 
 	def create_options(shop_prod_id, product_group)
 		p "Creating options for products"
-		shop_prod = ShopifyAPI::Product.last
+		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
 		product_group.products.first.variations.where("key != 'model'")
 								 .where("key != 'EAN'").where("key != 'use'")
 								 .limit(3).each_with_index do |v, index|
@@ -105,17 +106,15 @@ namespace :shopify do
 		variation.option2 = variations[1]
 		variation.option3 = variations[2]
 
-		p variation.save
-		p variation.errors.full_messages
+		variation.save
 
-		p shop_prod.save
-		p shop_prod.errors.full_messages
+		shop_prod.save
 	end
 
 	def add_variation(shop_prod_id, product, index)
 		p "Adding variation #{product.name}"
 
-		shop_prod = ShopifyAPI::Product.last
+		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
 		
 		variations = product.variations.where("key != 'model'")
 									.where("key != 'EAN'").where("key != 'use'")
@@ -141,14 +140,13 @@ namespace :shopify do
 		variant.inventory_quantity = product.stock
 		shop_prod.variants << variant
 
-		p shop_prod.save
-		p shop_prod.errors.full_messages
+		shop_prod.save
 	end
 
 	def add_image(shop_prod_id, product)
 		p "Adding image #{product.name}"
 
-		shop_prod = ShopifyAPI::Product.last
+		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
 		image = ShopifyAPI::Image.new
 		image.src = product.photo_url
 		shop_prod.images << image
