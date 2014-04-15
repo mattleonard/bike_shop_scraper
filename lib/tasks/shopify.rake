@@ -12,6 +12,17 @@ namespace :shopify do
 				end
 			end
 		end
+		task :create_new => :environment do
+			shopify_auth()
+			create_categories()
+
+			ProductGroup.all.each do |pg|
+				if pg.products.where(shopify_id: nil).active.pluck(:stock).any? {|s| s != 0}
+
+					create_shopify_product(pg)
+				end
+			end
+		end
 	end
 
 	def shopify_auth
