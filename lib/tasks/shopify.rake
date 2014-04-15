@@ -56,18 +56,24 @@ namespace :shopify do
 		check_limit()
 
 		all_images = pg.products.first.variations.where("key != 'model'")
-								 .where("key != 'EAN'").where("key != 'use'").pluck(:key)
-								 .any? {|v| v.downcase.match('color') or v.downcase.match('lens') }
+								 .where("key != 'EAN'").where("key != 'use'")
+								 .where("lower(key) LIKE ? OR lower(key) LIKE ? ", "%color%", "%lens%")
+								 .any?
 
 		if !all_images
 			add_image(shop_prod_id, pg.products.first)
 		end
 		
+		colors = []
+
 		pg.products.complete.each_with_index do |product, index|
 			check_limit()
 			variant_id = add_variation(shop_prod_id, product, index)
-			if all_images
+			product_color = product.variations.where("lower(key) LIKE ? OR lower(key) LIKE ? ", "%color%", "%lens%")
+							 							 .pluck(:value)
+			if all_images and !colors.include?(product_color)
 				add_image(shop_prod_id, product)
+				colors << product_color
 			end
 			product.shopify_id = ShopifyAPI::Variant.last.id
 			product.save
