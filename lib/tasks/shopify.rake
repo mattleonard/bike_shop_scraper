@@ -49,10 +49,13 @@ namespace :shopify do
 		p "Adding #{pg.name} -----------------------------------"
 
 		shop_prod_id = initial_product(pg)
+		sleep 0.5
 		place_in_collection(shop_prod_id, pg)
+		sleep 0.5
 		create_options(shop_prod_id, pg)
-		
+		sleep 0.5
 		pg.products.each_with_index do |product, index|
+			sleep 0.5
 			variant_id = add_variation(shop_prod_id, product, index)
 			add_image(shop_prod_id, product)
 			product.shopify_id = ShopifyAPI::Variant.last.id
