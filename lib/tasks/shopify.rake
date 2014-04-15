@@ -74,7 +74,7 @@ namespace :shopify do
 
 		shop_prod.save
 
-		return shop_prod
+		return shop_prod.id
 	end
 
 	def place_in_collection(shop_prod_id, product_group)
