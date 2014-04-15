@@ -71,7 +71,8 @@ namespace :shopify do
 		shop_prod.product_type = category
 		shop_prod.published_scope = "global"
 
-		shop_prod.save
+		p shop_prod.save
+		p shop_prod.errors.full_messages
 	end
 
 	def place_in_collection(shop_prod_id, product_group)
@@ -82,7 +83,8 @@ namespace :shopify do
 	  collect = ShopifyAPI::Collect.new
 	  collect.product_id = shop_prod.id
 	  collect.collection_id = ShopifyAPI::CustomCollection.where(title: category).first.id
-	 	collect.save
+	 	p collect.save
+	 	p collect.errors.full_messages
 	end
 
 	def create_options(shop_prod_id, product_group)
@@ -103,9 +105,12 @@ namespace :shopify do
 		variation.option1 = variations[0]
 		variation.option2 = variations[1]
 		variation.option3 = variations[2]
-		variation.save
 
-		shop_prod.save
+		p variation.save
+		p variation.errors.full_messages
+
+		p shop_prod.save
+		p shop_prod.errors.full_messages
 	end
 
 	def add_variation(shop_prod_id, product, index)
@@ -136,7 +141,9 @@ namespace :shopify do
 		variant.inventory_management = "shopify"
 		variant.inventory_quantity = product.stock
 		shop_prod.variants << variant
-		shop_prod.save
+
+		p shop_prod.save
+		p shop_prod.full_messages
 	end
 
 	def add_image(shop_prod_id, product)
