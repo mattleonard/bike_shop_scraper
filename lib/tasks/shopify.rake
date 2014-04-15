@@ -54,11 +54,21 @@ namespace :shopify do
 		check_limit()
 		create_options(shop_prod_id, pg)
 		check_limit()
+
+		all_images = pg.products.first.variations.where("key != 'model'")
+								 .where("key != 'EAN'").where("key != 'use'").pluck(:key)
+								 .any? {|v| v.downcase.match('color') or v.downcase.match('lens') }
+
+		if !all_images
+			add_image(shop_prod_id, pg.products.first)
+		end
 		
 		pg.products.each_with_index do |product, index|
 			check_limit()
 			variant_id = add_variation(shop_prod_id, product, index)
-			add_image(shop_prod_id, product)
+			if all_images
+				add_image(shop_prod_id, product)
+			end
 			product.shopify_id = ShopifyAPI::Variant.last.id
 			product.save
 		end
