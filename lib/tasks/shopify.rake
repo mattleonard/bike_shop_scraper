@@ -49,6 +49,7 @@ namespace :shopify do
 		p "Adding #{pg.name} -----------------------------------"
 
 		shop_prod_id = initial_product(pg)
+		p shop_prod_id
 		place_in_collection(shop_prod_id, pg)
 		create_options(shop_prod_id, pg)
 		
