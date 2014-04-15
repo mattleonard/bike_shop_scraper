@@ -49,13 +49,9 @@ namespace :shopify do
 		p "Adding #{pg.name} -----------------------------------"
 
 		shop_prod_id = initial_product(pg)
-		sleep 0.5
 		place_in_collection(shop_prod_id, pg)
-		sleep 0.5
 		create_options(shop_prod_id, pg)
-		sleep 0.5
 		pg.products.each_with_index do |product, index|
-			sleep 0.5
 			variant_id = add_variation(shop_prod_id, product, index)
 			add_image(shop_prod_id, product)
 			product.shopify_id = ShopifyAPI::Variant.last.id
@@ -82,7 +78,7 @@ namespace :shopify do
 		p "Placing product in collection"
 
 		category = Category.find(product_group.category_id).name
-		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		shop_prod = ShopifyAPI::Product.last
 	  collect = ShopifyAPI::Collect.new
 	  collect.product_id = shop_prod.id
 	  collect.collection_id = ShopifyAPI::CustomCollection.where(title: category).first.id
@@ -92,7 +88,7 @@ namespace :shopify do
 
 	def create_options(shop_prod_id, product_group)
 		p "Creating options for products"
-		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		shop_prod = ShopifyAPI::Product.last
 		product_group.products.first.variations.where("key != 'model'")
 								 .where("key != 'EAN'").where("key != 'use'")
 								 .limit(3).each_with_index do |v, index|
@@ -119,7 +115,7 @@ namespace :shopify do
 	def add_variation(shop_prod_id, product, index)
 		p "Adding variation #{product.name}"
 
-		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		shop_prod = ShopifyAPI::Product.last
 		
 		variations = product.variations.where("key != 'model'")
 									.where("key != 'EAN'").where("key != 'use'")
@@ -152,7 +148,7 @@ namespace :shopify do
 	def add_image(shop_prod_id, product)
 		p "Adding image #{product.name}"
 
-		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		shop_prod = ShopifyAPI::Product.last
 		image = ShopifyAPI::Image.new
 		image.src = product.photo_url
 		shop_prod.images << image
