@@ -24,6 +24,7 @@ namespace :shopify do
 	end
 
 	def create_categories
+		p "Creating categories"
 		Category.all.each do |c|
 			sleep 0.5
 
@@ -45,29 +46,51 @@ namespace :shopify do
 	end
 
 	def create_shopify_product(pg)
-		p "Adding #{pg.name}"
+		p "Adding #{pg.name} -----------------------------------"
 
-		# Creating inital product
+		shop_prod_id = initial_product(pg)
+		place_in_collection(shop_prod_id, pg)
+		create_options(shop_prod_id, pg)
+		
+		pg.products.each_with_index do |product, index|
+			variant_id = add_variation(shop_prod_id, product, index)
+			add_image(shop_prod_id, product)
+			product.shopify_id = ShopifyAPI::Variant.last.id
+			product.save
+		end
+	end
+
+	def initial_product(product_group)
+		p "Creating basic product"
+
 		shop_prod = ShopifyAPI::Product.new
-		shop_prod.title = pg.name
-		shop_prod.body_html = pg.description
-		shop_prod.vendor = pg.brand
-		category = Category.find(pg.category_id).name
+		shop_prod.title = product_group.name
+		shop_prod.body_html = product_group.description
+		shop_prod.vendor = product_group.brand
+		category = Category.find(product_group.category_id).name
 		shop_prod.product_type = category
 		shop_prod.published_scope = "global"
 
 		shop_prod.save
+	end
 
-		# Connects collections
+	def place_in_collection(shop_prod_id, product_group)
+		p "Placing product in collection"
+
+		category = Category.find(product_group.category_id).name
+		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
 	  collect = ShopifyAPI::Collect.new
 	  collect.product_id = shop_prod.id
 	  collect.collection_id = ShopifyAPI::CustomCollection.where(title: category).first.id
 	 	collect.save
+	end
 
-		products = pg.products
-
-		# Creates variations for products
-		products.first.variations.where("key != 'model'").each_with_index do |v, index|
+	def create_options(shop_prod_id, product_group)
+		p "Creating options for products"
+		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		product_group.products.first.variations.where("key != 'model'")
+								 .where("key != 'EAN'").where("key != 'use'")
+								 .limit(3).each_with_index do |v, index|
 			if index == 0
 				shop_prod.options.first.name = v.key.titleize
 			else
@@ -75,47 +98,54 @@ namespace :shopify do
 			end
 		end
 
-		# Added variation details
-		products.each_with_index do |prod, index|
-			variations = prod.variations.where("key != 'model'")
+		variations = product_group.products.first.variations.pluck(:value)
+		variation = shop_prod.variants.first
+		variation.option1 = variations[0]
+		variation.option2 = variations[1]
+		variation.option3 = variations[2]
+		variation.save
 
-			variant = 
-			if index == 0
-				shop_prod.variants.first
-			else
-				variant = ShopifyAPI::Variant.new
-			end
-			variant.option1 = variations[0].try(:value)
-			variant.option2 = variations[1].try(:value)
-			variant.option3 = variations[1].try(:value)
-				
-			price = prod.sale_price == 0 ? prod.regular_price : prod.sale_price
-			price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
-			price = [price, prod.msrp_price].min unless prod.msrp_price == 0
+		shop_prod.save
+	end
 
-			variant.price = price
-			variant.inventory_quantity = prod.stock
-			shop_prod.variants << variant
+	def add_variation(shop_prod_id, product, index)
+		p "Adding variation #{product.name}"
 
-			image = ShopifyAPI::Image.new
-			image.src = prod.photo_url
-			shop_prod.images << image
+		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		
+		variations = product.variations.where("key != 'model'")
+									.where("key != 'EAN'").where("key != 'use'")
+									.limit(3).pluck(:value)
 
-			p "-- Variation: #{prod.name}"
-			p "---- price: #{price}"
-			p ""
-
+		variant = 
+		if index == 0
+			shop_prod.variants.first
+		else
+			ShopifyAPI::Variant.new
 		end
 
-	 	shop_prod.save
+		variant.option1 = variations[0]
+		variant.option2 = variations[1]
+		variant.option3 = variations[2]
+			
+		price = product.sale_price == 0 ? product.regular_price : product.sale_price
+		price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
+		price = [price, product.msrp_price].min unless product.msrp_price == 0
 
-	 	variants = shop_prod.variants
+		variant.price = price
+		variant.inventory_management = "shopify"
+		variant.inventory_quantity = product.stock
+		shop_prod.variants << variant
+		shop_prod.save
+	end
 
-	 	# Sets shopify id for variations
-	 	variants.each_with_index do |v, i|
-	 		product = products[i]
-	 		product.shopify_id = v.id
-	 		product.save
-	 	end
+	def add_image(shop_prod_id, product)
+		p "Adding image #{product.name}"
+
+		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		image = ShopifyAPI::Image.new
+		image.src = product.photo_url
+		shop_prod.images << image
+		shop_prod.save
 	end
 end
