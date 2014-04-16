@@ -63,6 +63,8 @@ namespace :scrape do
 			items = 
 				if args.type == "new"
 					Product.where('name IS NULL').active
+				elsif args.type == "price"
+					Product.where(regular_price: 0).active
 				else
 					Product.active
 				end
