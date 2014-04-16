@@ -98,7 +98,11 @@ namespace :shopify do
 		shop_prod.title = product_group.name
 		shop_prod.body_html = product_group.description
 		shop_prod.vendor = product_group.brand
-		category = Category.find(product_group.category_id).name
+		if product_group.category_id
+			category = Category.find(product_group.category_id).name
+		else
+			category = "Miscellaneous"
+		end
 		shop_prod.product_type = category
 		shop_prod.published_scope = "global"
 
@@ -110,12 +114,18 @@ namespace :shopify do
 	def place_in_collection(shop_prod_id, product_group)
 		p "Placing product in collection"
 
-		category = Category.find(product_group.category_id).name
+		if product_group.category_id
+			category = Category.find(product_group.category_id).name
+		else
+			category = "Miscellaneous"
+		end
 		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
 	  collect = ShopifyAPI::Collect.new
 	  collect.product_id = shop_prod.id
-	  collect.collection_id = ShopifyAPI::CustomCollection.where(title: category).first.id
-	 	collect.save
+	  if ShopifyAPI::CustomCollection.where(title: category).any?
+		  collect.collection_id = ShopifyAPI::CustomCollection.where(title: category).first.id
+		 	collect.save
+		 end
 	end
 
 	def create_options(shop_prod_id, product_group)
