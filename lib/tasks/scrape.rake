@@ -86,10 +86,16 @@ namespace :scrape do
 					product.archive
 				end
 
-				category_name = raw_xml.css('.crumbs').css('a').first(2).last.text
+				category_parent_name = raw_xml.css('.crumbs').css('a').first(2).last.text
+				category_child_name = raw_xml.css('.crumbs').css('a').first(4).last.text
+
+				category_parent = Category.where(name: category_parent_name).first_or_create
+				category_child = Category.where(name: category_child_name).first_or_create
+				category_parent.children << category_child unless category_parent.children.include?(category_child)
 
 				pg = product.product_group
-				pg.category_id = Category.where(name: category_name).first_or_create.id
+				pg.categories << category_parent unless pg.categories.include?(category_parent)
+				pg.categories << category_child unless pg.categories.include?(category_child)
 				pg.brand = raw_xml.css('.headline').css('span').text
 				pg.save
 
