@@ -8,13 +8,17 @@ class Product < ActiveRecord::Base
 
 	 scope :alphabetical, -> { order(:name) }
 	 scope :active, -> { where(status: "active") }
-	 scope :complete, -> { where('regular_price IS NOT NULL').
-	 											 where('photo_url IS NOT NULL') }
+	 scope :complete, -> { 
+	 	where('regular_price IS NOT NULL').
+	 	where('photo_url IS NOT NULL') 
+	 }
+	 scope :authorization_not_required, -> {
+	 	where(authorization_required: false)
+	 }
 
 	 state_machine :status, initial: :active do
 	 	event :archive do
 	 		transition :active => :archived
 	 	end
 	 end
-
 end

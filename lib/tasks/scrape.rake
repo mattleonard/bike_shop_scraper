@@ -73,56 +73,52 @@ namespace :scrape do
 	end
 
 	def update_products(a, products)
-		pool = Thread.pool(2)
 		products.each do |product|
-			pool.process {
 			
-				page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
+			page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
 
-				raw_xml = page.parser
+			raw_xml = page.parser
 
-				if raw_xml.css("#errorCell").any?
-					product.archive
-				end
+			if raw_xml.css("#errorCell").any?
+				product.archive
+			end
 
-				category_parent_name = raw_xml.css('.crumbs').css('a').first(2).last.text
-				category_child_name = raw_xml.css('.crumbs').css('a').first(4).last.text
+			category_parent_name = raw_xml.css('.crumbs').css('a').first(2).last.text
+			category_child_name = raw_xml.css('.crumbs').css('a').first(4).last.text
 
-				category_parent = Category.where(name: category_parent_name).first_or_create
-				category_child = Category.where(name: category_child_name).first_or_create
-				category_parent.children << category_child unless category_parent.children.include?(category_child)
+			category_parent = Category.where(name: category_parent_name).first_or_create
+			category_child = Category.where(name: category_child_name).first_or_create
+			category_parent.children << category_child unless category_parent.children.include?(category_child)
 
-				pg = product.product_group
-				pg.categories << category_parent unless pg.categories.include?(category_parent)
-				pg.categories << category_child unless pg.categories.include?(category_child)
-				pg.brand = raw_xml.css('.headline').css('span').text
-				pg.save
+			pg = product.product_group
+			pg.categories << category_parent unless pg.categories.include?(category_parent)
+			pg.categories << category_child unless pg.categories.include?(category_child)
+			pg.brand = raw_xml.css('.headline').css('span').text
+			pg.save
 
-				image_url = raw_xml.css(".itemTable").css("img")[1].attributes["src"].value.gsub('thumbnails/large', 'pictures')
+			image_url = raw_xml.css(".itemTable").css("img")[1].attributes["src"].value.gsub('thumbnails/large', 'pictures')
 
-				product.authorization_required = !(!!page.form_with(:action => '/public/add_to_cart') or 
-															!!raw_xml.search('//img/@src').to_s.match('/images/stockalert.gif'))
-				product.photo_url = "https://bti-usa.com" + image_url
-				product.model = pg.name.gsub(pg.brand, '')
-				product.save
+			product.authorization_required = !(!!page.form_with(:action => '/public/add_to_cart') or 
+														!!raw_xml.search('//img/@src').to_s.match('/images/stockalert.gif'))
+			product.photo_url = "https://bti-usa.com" + image_url
+			product.model = pg.name.gsub(pg.brand, '')
+			product.save
 
-				parse_product_price(raw_xml, product)
+			parse_product_price(raw_xml, product)
 
-			  raw_xml.css('.itemSpecTable').css('tr').each do |variation|
-			  	key = variation.css('.specLabel').text
-			  	value = variation.css('.specData').text
-			  		
-			  	unless key == "" or value == "" or 
-			  				 key == "BTI part #:" or 
-			  				 key == "vendor part #:" or
-			  				 key == "UPC:"
-			  		variation = Variation.where(key: key.gsub(':',''), value: value.gsub('/', ' / ').titleize, product_id: product.id)
-			  												 .first_or_create
-			  	end
-			  end
-			}
+		  raw_xml.css('.itemSpecTable').css('tr').each do |variation|
+		  	key = variation.css('.specLabel').text
+		  	value = variation.css('.specData').text
+		  		
+		  	unless key == "" or value == "" or 
+		  				 key == "BTI part #:" or 
+		  				 key == "vendor part #:" or
+		  				 key == "UPC:"
+		  		variation = Variation.where(key: key.gsub(':',''), value: value.gsub('/', ' / ').titleize, product_id: product.id)
+		  												 .first_or_create
+		  	end
+		  end
 		end
-		pool.shutdown
 	end
 
 	def parse_product_price(raw_xml, item)

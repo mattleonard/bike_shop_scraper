@@ -6,9 +6,10 @@ namespace :shopify do
 			create_categories()
 
 			ProductGroup.all.each do |pg|
-				if pg.products.active.pluck(:stock).any? {|s| s != 0}
-
-					create_shopify_product(pg)
+				if pg.products.active.pluck(:stock).any? {|s| s != 0} and
+					if !pg.authorization_required?
+						create_shopify_product(pg)
+					end
 				end
 			end
 		end
@@ -18,8 +19,9 @@ namespace :shopify do
 
 			ProductGroup.all.each do |pg|
 				if pg.products.where(shopify_id: nil).active.pluck(:stock).any? {|s| s != 0}
-
-					create_shopify_product(pg)
+					if !pg.authorization_required?
+						create_shopify_product(pg)
+					end
 				end
 			end
 		end
@@ -37,7 +39,7 @@ namespace :shopify do
 	def create_categories
 		p "Creating categories"
 		Category.all.each do |c|
-			sleep 0.5
+			check_limit
 
 			unless ShopifyAPI::CustomCollection.where(title: c.name).any?
 				collection = ShopifyAPI::CustomCollection.new
@@ -61,7 +63,7 @@ namespace :shopify do
 
 		shop_prod_id = initial_product(pg)
 		check_limit()
-		place_in_collection(shop_prod_id, pg)
+		place_in_collections(shop_prod_id, pg)
 		check_limit()
 		create_options(shop_prod_id, pg)
 		check_limit()
@@ -98,34 +100,28 @@ namespace :shopify do
 		shop_prod.title = product_group.name
 		shop_prod.body_html = product_group.description
 		shop_prod.vendor = product_group.brand
-		if product_group.category_id
-			category = Category.find(product_group.category_id).name
-		else
-			category = "Miscellaneous"
-		end
+		category = product_group.parent_category.name
+
 		shop_prod.product_type = category
-		shop_prod.published_scope = "global"
+		shop_prod.published_scope = "global" if !product_group.products_with_stock
 
 		shop_prod.save
 
 		return shop_prod.id
 	end
 
-	def place_in_collection(shop_prod_id, product_group)
-		p "Placing product in collection"
+	def place_in_collections(shop_prod_id, product_group)
+		product_group.categories.each do |category|
+			p "Placing product in collection #{category.name}"
 
-		if product_group.category_id
-			category = Category.find(product_group.category_id).name
-		else
-			category = "Miscellaneous"
+			shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		  collect = ShopifyAPI::Collect.new
+		  collect.product_id = shop_prod.id
+		  if ShopifyAPI::CustomCollection.where(title: category.name).any?
+			  collect.collection_id = ShopifyAPI::CustomCollection.where(title: category.name).first.id
+				collect.save
+			end
 		end
-		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
-	  collect = ShopifyAPI::Collect.new
-	  collect.product_id = shop_prod.id
-	  if ShopifyAPI::CustomCollection.where(title: category).any?
-		  collect.collection_id = ShopifyAPI::CustomCollection.where(title: category).first.id
-		 	collect.save
-		 end
 	end
 
 	def create_options(shop_prod_id, product_group)

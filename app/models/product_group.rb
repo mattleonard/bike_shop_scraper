@@ -15,4 +15,16 @@ class ProductGroup < ActiveRecord::Base
 			transition :active => :archived
 		end
 	end
+
+	def parent_category
+		self.categories.select {|c| c.parent_id == nil }
+	end
+
+	def products_with_stock
+		self.products.any? {|p| p.stock != 0 }
+	end
+
+	def authorization_required?
+		self.products.all? {|p| p.authorization_required == true }
+	end
 end
