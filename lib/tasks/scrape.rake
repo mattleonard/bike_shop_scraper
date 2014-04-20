@@ -3,10 +3,12 @@ require 'nokogiri'
 require 'open-uri'
 require 'thread/pool'
 
+N = 4
+
 namespace :scrape do
 	namespace :bti do
 		task :get_product_groups => :environment do
-			pool = Thread.pool(4)
+			pool = Thread.pool(N)
 	
 			a = Mechanize.new
 
@@ -73,7 +75,7 @@ namespace :scrape do
 	end
 
 	def update_products(a, products)
-		pool = Thread.pool(4)
+		pool = Thread.pool(N)
 
 		products.find_each do |product|
 			pool.process {
