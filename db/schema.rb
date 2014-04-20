@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140417085119) do
+ActiveRecord::Schema.define(version: 20140420010418) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -60,7 +60,8 @@ ActiveRecord::Schema.define(version: 20140417085119) do
     t.float    "regular_price"
     t.string   "photo_url"
     t.integer  "shopify_id"
-    t.string   "status",           default: "active"
+    t.string   "status",                 default: "active"
+    t.boolean  "authorization_required", default: false
   end
 
   create_table "users", force: true do |t|
