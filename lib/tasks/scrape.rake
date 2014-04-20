@@ -96,11 +96,15 @@ namespace :scrape do
 			pg.brand = raw_xml.css('.headline').css('span').text
 			pg.save
 
-			image_url = raw_xml.css(".itemTable").css("img")[1].attributes["src"].value.gsub('thumbnails/large', 'pictures')
+			images = raw_xml.css(".itemTable").css("img")[1]
+			
+			if images
+				image_url = images.attributes["src"].value.gsub('thumbnails/large', 'pictures') 
+				product.photo_url = "https://bti-usa.com" + image_url
+			end
 
 			product.authorization_required = !(!!page.form_with(:action => '/public/add_to_cart') or 
 														!!raw_xml.search('//img/@src').to_s.match('/images/stockalert.gif'))
-			product.photo_url = "https://bti-usa.com" + image_url
 			product.model = pg.name.gsub(pg.brand, '')
 			product.save
 
