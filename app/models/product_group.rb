@@ -20,7 +20,7 @@ class ProductGroup < ActiveRecord::Base
 	end
 
 	def parent_category
-		self.categories.select {|c| c.parent_id == nil }.first
+		self.categories.select {|c| c.parent == true }.first
 	end
 
 	def products_with_stock
