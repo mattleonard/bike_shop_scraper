@@ -90,11 +90,11 @@ namespace :scrape do
 	def load_products(type)
 		items = 
 				if type == "new"
-					Product.where('name IS NULL').active
+					Product.where('name IS NULL').need_to_scrape
 				elsif type == "price"
-					Product.where(regular_price: 0).active
+					Product.where(regular_price: 0).need_to_scrape
 				else
-					Product.active
+					Product.need_to_scrape
 				end
 
 		items
@@ -115,7 +115,13 @@ namespace :scrape do
 		category_parent = Category.where(name: category_parent_name, parent: true).first_or_create
 		category_child = Category.where(name: category_child_name).first_or_create
 
+
+
 		pg = product.product_group
+
+		pg.activate if pg.status == "scraped"
+		product.activate if product.status == "scraped"
+		
 		pg.categories << category_parent unless pg.categories.include?(category_parent)
 		pg.categories << category_child unless pg.categories.include?(category_child)
 		pg.brand = raw_xml.css('.headline').css('span').text

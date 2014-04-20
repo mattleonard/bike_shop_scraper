@@ -8,6 +8,9 @@ class Product < ActiveRecord::Base
 
 	 scope :alphabetical, -> { order(:name) }
 	 scope :active, -> { where(status: "active") }
+	 scope :need_to_scrape, -> { 
+	 	where("status = 'active' OR status = 'scraped'") 
+	 }
 	 scope :complete, -> { 
 	 	where('regular_price IS NOT NULL').
 	 	where('photo_url IS NOT NULL') 
@@ -16,7 +19,10 @@ class Product < ActiveRecord::Base
 	 	where(authorization_required: false)
 	 }
 
-	 state_machine :status, initial: :active do
+	 state_machine :status, initial: :scraped do
+	 	event :activate do
+	 		transition :scraped => :active
+	 	end
 	 	event :archive do
 	 		transition :active => :archived
 	 	end

@@ -10,7 +10,10 @@ class ProductGroup < ActiveRecord::Base
 	scope :alphabetical, -> { order(:name) }
 
 
-	state_machine :status, initial: :active do
+	state_machine :status, initial: :scraped do
+	 	event :activate do
+	 		transition :scraped => :active
+	 	end
 		event :archive do
 			transition :active => :archived
 		end
