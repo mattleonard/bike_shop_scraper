@@ -112,9 +112,8 @@ namespace :scrape do
 		category_parent_name = raw_xml.css('.crumbs').css('a').first(2).last.text
 		category_child_name = raw_xml.css('.crumbs').css('a').first(4).last.text
 
-		category_parent = Category.where(name: category_parent_name).first_or_create
+		category_parent = Category.where(name: category_parent_name, parent: true).first_or_create
 		category_child = Category.where(name: category_child_name).first_or_create
-		category_parent.children << category_child unless category_parent.children.include?(category_child)
 
 		pg = product.product_group
 		pg.categories << category_parent unless pg.categories.include?(category_parent)
