@@ -30,4 +30,8 @@ class ProductGroup < ActiveRecord::Base
 	def authorization_required?
 		self.products.all? {|p| p.authorization_required == true }
 	end
+
+	def tags
+		self.categories.pluck(:name).join(', ')
+	end
 end

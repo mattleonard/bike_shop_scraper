@@ -100,6 +100,7 @@ namespace :shopify do
 		shop_prod.title = product_group.name
 		shop_prod.body_html = product_group.description
 		shop_prod.vendor = product_group.brand
+		shop_prod.tags = product_group.tags
 		category = product_group.parent_category.name
 
 		shop_prod.product_type = category
