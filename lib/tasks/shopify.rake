@@ -184,11 +184,16 @@ namespace :shopify do
 	def add_image(shop_prod_id, product)
 		p "Adding image #{product.name}"
 
-		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
-		image = ShopifyAPI::Image.new
-		image.src = product.photo_url
-		shop_prod.images << image
-		shop_prod.save
+		forbidden_urls = ["https://bti-usa.com/images/stockalert.gif", 
+											"https://bti-usa.com/images/Magnify.gif"]
+
+		if !forbidden_urls.include?(product.photo_url)
+			shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+			image = ShopifyAPI::Image.new
+			image.src = product.photo_url
+			shop_prod.images << image
+			shop_prod.save
+		end
 	end
 
 	def check_limit
