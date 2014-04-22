@@ -106,7 +106,8 @@ namespace :shopify do
 		shop_prod.product_type = category
 		shop_prod.published_scope = "global" if !product_group.products_with_stock
 
-		shop_prod.save
+		p shop_prod.save
+		p shop_prod.errors.full_messages
 
 		return shop_prod.id
 	end
