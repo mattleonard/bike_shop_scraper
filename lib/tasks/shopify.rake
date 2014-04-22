@@ -111,6 +111,8 @@ namespace :shopify do
 
 		shop_prod.published_scope = "global" if !product_group.products_with_stock
 
+		shop_prod.save
+
 		return shop_prod.id
 	end
 
