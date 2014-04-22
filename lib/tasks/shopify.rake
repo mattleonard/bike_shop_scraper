@@ -101,13 +101,15 @@ namespace :shopify do
 		shop_prod.body_html = product_group.description
 		shop_prod.vendor = product_group.brand
 		shop_prod.tags = product_group.tags
+		
 		category = product_group.parent_category.name
+		if !(category == "")
+			shop_prod.product_type = category
+		else
+			shop_prod.product_type = "Miscellaneous"
+		end
 
-		shop_prod.product_type = category
 		shop_prod.published_scope = "global" if !product_group.products_with_stock
-
-		p shop_prod.save
-		p shop_prod.errors.full_messages
 
 		return shop_prod.id
 	end
