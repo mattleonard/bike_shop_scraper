@@ -197,13 +197,13 @@ namespace :shopify do
 	end
 
 	def check_limit
-		if ShopifyAPI.credit_left <= 10
+		if ShopifyAPI.credit_left <= 20
 			p ""
 			p "Credit left #{ShopifyAPI.credit_left}"
 			p "Waiting for API Bucket to empty"
 			p ""
 
-			sleep 5 
+			sleep 10 
 		end
 	end
 end
