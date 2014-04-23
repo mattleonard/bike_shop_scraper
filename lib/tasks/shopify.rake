@@ -28,11 +28,13 @@ namespace :shopify do
 		task :update_stock => :environment do
 			shopify_auth()
 
-			Product.where('shopify_id IS NOT NULL OR status = ?', 'active').
+			Product.where('shopify_id IS NOT NULL AND status = ?', 'active').
 							complete.each do |p|
 				update_stock_and_price(p.shopify_id, p)
 				check_limit
 			end
+
+			Rake::Task["shopify:product:create_new"].execute
 		end
 	end
 
@@ -72,6 +74,8 @@ namespace :shopify do
 
 		shop_prod_id = initial_product(pg)
 		check_limit()
+		pg.shopify_id = shop_prod_id
+		pg.save
 		place_in_collections(shop_prod_id, pg)
 		check_limit()
 		create_options(shop_prod_id, pg)
@@ -198,27 +202,7 @@ namespace :shopify do
 	def update_stock_and_price(shopify_id, product)
 		p "Updating stock #{product.name}"
 
-		variant = ShopifyAPI::Variant.where(id: shopify_id).first
-		
-		pg = product.product_group
-
-		if !variant
-			pg.shopify_id = nil
-			pg.save
-
-			pg.products.update_all(shopify_id: nil)
-
-			return
-		end
-
-		if product.archived?
-			variant.destroy
-
-			product.shopify_id = nil
-			product.save
-
-			return
-		end
+		variant = ShopifyAPI::Variant.find(shopify_id)
 
 		price = product.sale_price == 0 ? product.regular_price : product.sale_price
 		price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
@@ -227,7 +211,7 @@ namespace :shopify do
 		variant.price = price
 		variant.inventory_quantity = product.stock
 
-		variant.save if variant
+		variant.save
 	end
 
 	def add_image(shop_prod_id, product)

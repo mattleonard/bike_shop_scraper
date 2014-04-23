@@ -70,7 +70,6 @@ namespace :scrape do
 			update_products(a, items, false)
 
 			Rake::Task["shopify:product:update_stock"].execute
-			Rake::Task["shopify:product:create_new"].execute
 		end
 	end
 
@@ -110,12 +109,12 @@ namespace :scrape do
 
 		pg = product.product_group
 
-		if raw_xml.css("#errorCell").any?
-			pg.archive
-			product.archive
+		# if raw_xml.css("#errorCell").any?
+		# 	pg.archive
+		# 	product.archive
 
-			return
-		end
+		# 	return
+		# end
 
 		category_parent_name = raw_xml.css('.crumbs').css('a').first(2).last.text
 		category_child_name = raw_xml.css('.crumbs').css('a').first(4).last.text
