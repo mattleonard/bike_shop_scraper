@@ -68,6 +68,9 @@ namespace :scrape do
 			items = load_products(args.type)
 
 			update_products(a, items, false)
+
+			Rake::Task["shopify:product:update_stock"].execute
+			Rake::Task["shopify:product:create_new"].execute
 		end
 	end
 

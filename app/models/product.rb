@@ -8,6 +8,7 @@ class Product < ActiveRecord::Base
 
 	 scope :alphabetical, -> { order(:name) }
 	 scope :active, -> { where(status: "active") }
+	 scope :on_shopify_or_needed, -> { where('shopify_id IS NOT NULL OR status = ?', 'active') }
 	 scope :need_to_scrape, -> { 
 	 	where("status = 'active' OR status = 'scraped'") 
 	 }
@@ -24,7 +25,7 @@ class Product < ActiveRecord::Base
 	 		transition :scraped => :active
 	 	end
 	 	event :archive do
-	 		transition :active => :archived
+	 		transition :any => :archived
 	 	end
 	 end
 end

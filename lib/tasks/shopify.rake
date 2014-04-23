@@ -25,6 +25,14 @@ namespace :shopify do
 				end
 			end
 		end
+		task :update_stock => :environment do
+			shopify_auth()
+
+			Product.where('shopify_id IS NOT NULL OR status = ?', 'active').
+							complete.each do |p|
+				update_stock_and_price(p.shopify_id, p)
+			end
+		end
 	end
 
 	def shopify_auth
@@ -184,6 +192,30 @@ namespace :shopify do
 		shop_prod.variants << variant
 
 		shop_prod.save
+	end
+
+	def update_stock_and_price(shop_prod_id, product)
+		p "Updating stock #{product.name}"
+
+		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		
+		if product.archived?
+			shop_prod.destroy
+
+			product.shopify_id = nil
+			product.save
+
+			return
+		end
+
+		price = product.sale_price == 0 ? product.regular_price : product.sale_price
+		price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
+		price = [price, product.msrp_price].min unless product.msrp_price == 0
+
+		variant.price = price
+		variant.inventory_quantity = product.stock
+
+		shop_prod.save if shop_prod
 	end
 
 	def add_image(shop_prod_id, product)
