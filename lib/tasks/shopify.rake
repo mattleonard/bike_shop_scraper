@@ -197,11 +197,18 @@ namespace :shopify do
 	def update_stock_and_price(shopify_id, product)
 		p "Updating stock #{product.name}"
 
-		variant = ShopifyAPI::Variant.find(shopify_id)
+		variant = ShopifyAPI::Variant.where(id: shopify_id).first
 		
 		pg = product.product_group
 
-		ShopifyAPI::Product.find(pg.shopify_id).destroy if !pg.products_with_stock
+		if !variant
+			pg.shopify_id = nil
+			pg.save
+
+			pg.products.update_all(shopify_id: nil)
+
+			return
+		end
 
 		if product.archived?
 			variant.destroy

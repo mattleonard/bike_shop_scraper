@@ -22,7 +22,7 @@ class Product < ActiveRecord::Base
 
 	 state_machine :status, initial: :scraped do
 	 	event :activate do
-	 		transition :scraped => :active
+	 		transition :any => :active
 	 	end
 	 	event :archive do
 	 		transition :any => :archived

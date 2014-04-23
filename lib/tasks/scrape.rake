@@ -123,9 +123,6 @@ namespace :scrape do
 		category_parent = Category.where(name: category_parent_name, parent: true).first_or_create
 		category_child = Category.where(name: category_child_name).first_or_create
 
-
-
-
 		pg.activate if pg.status == "scraped"
 		product.activate if product.status == "scraped"
 		
