@@ -31,6 +31,7 @@ namespace :shopify do
 			Product.where('shopify_id IS NOT NULL OR status = ?', 'active').
 							complete.each do |p|
 				update_stock_and_price(p.shopify_id, p)
+				check_limit
 			end
 		end
 	end
