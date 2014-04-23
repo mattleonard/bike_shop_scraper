@@ -194,13 +194,17 @@ namespace :shopify do
 		shop_prod.save
 	end
 
-	def update_stock_and_price(shop_prod_id, product)
+	def update_stock_and_price(shopify_id, product)
 		p "Updating stock #{product.name}"
 
-		shop_prod = ShopifyAPI::Product.find(shop_prod_id)
+		variant = ShopifyAPI::Variant.find(shopify_id)
 		
+		pg = product.product_group
+
+		ShopifyAPI::Product.find(pg.shopify_id).destroy if !pg.products_with_stock
+
 		if product.archived?
-			shop_prod.destroy
+			variant.destroy
 
 			product.shopify_id = nil
 			product.save
@@ -215,7 +219,7 @@ namespace :shopify do
 		variant.price = price
 		variant.inventory_quantity = product.stock
 
-		shop_prod.save if shop_prod
+		variant.save if variant
 	end
 
 	def add_image(shop_prod_id, product)

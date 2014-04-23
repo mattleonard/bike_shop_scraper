@@ -108,8 +108,13 @@ namespace :scrape do
 
 		raw_xml = page.parser
 
+		pg = product.product_group
+
 		if raw_xml.css("#errorCell").any?
+			pg.archive
 			product.archive
+
+			return
 		end
 
 		category_parent_name = raw_xml.css('.crumbs').css('a').first(2).last.text
@@ -120,7 +125,6 @@ namespace :scrape do
 
 
 
-		pg = product.product_group
 
 		pg.activate if pg.status == "scraped"
 		product.activate if product.status == "scraped"
