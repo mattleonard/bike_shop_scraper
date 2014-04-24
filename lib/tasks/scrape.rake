@@ -116,8 +116,8 @@ namespace :scrape do
 		# 	return
 		# end
 
-		category_parent_name = raw_xml.css('.crumbs').css('a').first(2).last.text
-		category_child_name = raw_xml.css('.crumbs').css('a').first(4).last.text
+		category_parent_name = raw_xml.css('.crumbs').css('a').first(2).last.try(:text)
+		category_child_name = raw_xml.css('.crumbs').css('a').first(4).last.try(:text)
 
 		category_parent = Category.where(name: category_parent_name, parent: true).first_or_create
 		category_child = Category.where(name: category_child_name).first_or_create
