@@ -8,7 +8,7 @@ N = 4
 namespace :scrape do
 	namespace :bti do
 		task :get_product_groups => :environment do
-			pool = Thread.pool(N)
+			# pool = Thread.pool(N)
 	
 			a = Mechanize.new
 
@@ -17,7 +17,7 @@ namespace :scrape do
 			puts "------------------------ Getting Product Groups -------------------------"
 
 			(1..1300).to_a.each do |page_num|
-				pool.process {
+				# pool.process {
 					puts "Scraping page #{page_num}"
 
 					page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
@@ -47,9 +47,9 @@ namespace :scrape do
 					  end
 					  pg.save
 					end
-				}
+				# }
 			end
-			pool.shutdown
+			# pool.shutdown
 
 			Rake::Task["scrape:bti:update_stock"].execute
 		end
@@ -63,7 +63,7 @@ namespace :scrape do
 
 			items = load_products(args.type)
 
-			update_products(a, items)
+			update_products(a, items, false)
 
 			items = load_products(args.type)
 
@@ -109,12 +109,12 @@ namespace :scrape do
 
 		pg = product.product_group
 
-		# if raw_xml.css("#errorCell").any?
-		# 	pg.archive
-		# 	product.archive
+		if raw_xml.css("#errorCell").any?
+			pg.archive
+			product.archive
 
-		# 	return
-		# end
+			return
+		end
 
 		category_parent_name = raw_xml.css('.crumbs').css('a').first(2).last.try(:text)
 		category_child_name = raw_xml.css('.crumbs').css('a').first(4).last.try(:text)
