@@ -63,11 +63,11 @@ namespace :scrape do
 
 			items = load_products(args.type)
 
-			update_products(a, items)
-
-			items = load_products(args.type)
-
 			update_products(a, items, false)
+
+			# items = load_products(args.type)
+
+			# update_products(a, items, false)
 
 			Rake::Task["shopify:product:update_stock"].execute
 		end
@@ -108,6 +108,7 @@ namespace :scrape do
 		rescue Net::HTTPBadGateway => e
 			product.archive
 
+			puts "Error - Bad Gateway"
 			return
 		end
 
