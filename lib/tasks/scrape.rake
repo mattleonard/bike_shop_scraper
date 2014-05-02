@@ -105,11 +105,14 @@ namespace :scrape do
 	def parse_product_info(a, product)
 		begin 
 			page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
-		rescue Net::HTTPBadGateway => e
-			product.archive
+		rescue Mechanize::ResponseCodeError => e
+			if e.response_code == '502'
 
-			puts "Error - Bad Gateway"
-			return
+				product.archive
+
+				puts "Error - Bad Gateway"
+				return
+			end
 		end
 
 		raw_xml = page.parser
