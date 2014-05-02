@@ -8,7 +8,7 @@ N = 4
 namespace :scrape do
 	namespace :bti do
 		task :get_product_groups => :environment do
-			# pool = Thread.pool(N)
+			pool = Thread.pool(N)
 	
 			a = Mechanize.new
 
@@ -17,7 +17,7 @@ namespace :scrape do
 			puts "------------------------ Getting Product Groups -------------------------"
 
 			(1..1300).to_a.each do |page_num|
-				# pool.process {
+				pool.process {
 					puts "Scraping page #{page_num}"
 
 					page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
@@ -47,9 +47,9 @@ namespace :scrape do
 					  end
 					  pg.save
 					end
-				# }
+				}
 			end
-			# pool.shutdown
+			pool.shutdown
 
 			Rake::Task["scrape:bti:update_stock"].execute
 		end
@@ -63,7 +63,7 @@ namespace :scrape do
 
 			items = load_products(args.type)
 
-			update_products(a, items, false)
+			update_products(a, items)
 
 			items = load_products(args.type)
 
@@ -103,7 +103,13 @@ namespace :scrape do
 	end
 
 	def parse_product_info(a, product)
-		page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
+		begin 
+			page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
+		rescue Net::HTTPBadGateway => e
+			product.archive
+
+			return
+		end
 
 		raw_xml = page.parser
 
