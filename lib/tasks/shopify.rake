@@ -35,6 +35,7 @@ namespace :shopify do
 			end
 
 			Rake::Task["shopify:product:create_new"].execute
+			Rake::Task["shopify:product:update_google_category"].execute
 		end
 
 		task :update_google_category => :environment do
@@ -203,6 +204,7 @@ namespace :shopify do
 		price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
 		price = [price, product.msrp_price].min unless product.msrp_price == 0
 
+		variant.sku = product.mpn
 		variant.price = price
 		variant.inventory_management = "shopify"
 		variant.inventory_quantity = product.stock
@@ -220,10 +222,12 @@ namespace :shopify do
 		price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
 		price = [price, product.msrp_price].min unless product.msrp_price == 0
 
+		variant.sku = product.mpn
 		variant.price = price
 		variant.inventory_quantity = product.stock
 
-		variant.save
+		p variant.save
+		p variant.errors.full_messages
 	end
 
 	def add_image(shop_prod_id, product)
