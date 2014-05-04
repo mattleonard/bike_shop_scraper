@@ -50,8 +50,6 @@ namespace :scrape do
 				}
 			end
 			pool.shutdown
-
-			Rake::Task["scrape:bti:update_stock"].execute
 		end
 
 		task :update_stock, [:type] => :environment do |task, args|
@@ -64,12 +62,6 @@ namespace :scrape do
 			items = load_products(args.type)
 
 			update_products(a, items, false)
-
-			# items = load_products(args.type)
-
-			# update_products(a, items, false)
-
-			Rake::Task["shopify:product:update_stock"].execute
 		end
 	end
 
@@ -157,7 +149,12 @@ namespace :scrape do
 	  raw_xml.css('.itemSpecTable').css('tr').each do |variation|
 	  	key = variation.css('.specLabel').text
 	  	value = variation.css('.specData').text
-	  		
+	  	
+	  	if key == "vendor part #:"
+	  		product.mpn = value
+	  		product.save if product.changed?
+	  	end
+
 	  	unless key == "" or value == "" or 
 	  				 key == "BTI part #:" or 
 	  				 key == "vendor part #:" or
