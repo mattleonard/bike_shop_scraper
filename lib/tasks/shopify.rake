@@ -33,9 +33,6 @@ namespace :shopify do
 				update_stock_and_price(p.shopify_id, p)
 				check_limit
 			end
-
-			Rake::Task["shopify:product:create_new"].execute
-			Rake::Task["shopify:product:update_google_category"].execute
 		end
 
 		task :update_google_category => :environment do

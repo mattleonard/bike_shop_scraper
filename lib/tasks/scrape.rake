@@ -13,6 +13,12 @@ namespace :scrape do
 				Rake::Task['scrape:bti:get_product_groups'].invoke
 				p "Scraping Update Stocks"
 				Rake::Task['scrape:bti:update_stock'].invoke
+				p "Updating Stock On Shopify"
+				Rake::Task["shopify:product:update_stock"].invoke
+				p "Creating New On Shopify"
+				Rake::Task["shopify:product:create_new"].invoke
+				p "Update Google Category"
+				Rake::Task["shopify:product:update_google_category"].invoke
 			end
 		end
 
