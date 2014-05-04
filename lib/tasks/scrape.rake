@@ -7,9 +7,18 @@ N = 4
 
 namespace :scrape do
 	namespace :bti do
+		task :update_all => :environment do
+			if Date.today.day.even?
+				p "Scraping Product Groups"
+				Rake::Task['scrape:bti:get_product_groups'].invoke
+				p "Scraping Update Stocks"
+				Rake::Task['scrape:bti:update_stock'].invoke
+			end
+		end
+
 		task :get_product_groups => :environment do
 			pool = Thread.pool(N)
-	
+
 			a = Mechanize.new
 
 			page = login(a)
