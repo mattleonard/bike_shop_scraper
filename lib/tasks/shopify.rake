@@ -36,6 +36,18 @@ namespace :shopify do
 
 			Rake::Task["shopify:product:create_new"].execute
 		end
+
+		task :update_google_category => :environment do
+			shopify_auth()
+
+			ProductGroup.where('shopify_id IS NOT NULL AND status = ?', 'active').each do |pg|
+				p pg.name
+				category = pg.categories.where(parent: false).first.try(:google_product_category)
+				category ||= "Sporting Goods > Outdoor Recreation > Cycling"
+				update_google_meta(pg.shopify_id, category.downcase)
+				check_limit
+			end
+		end
 	end
 
 	def shopify_auth
@@ -227,6 +239,26 @@ namespace :shopify do
 			shop_prod.images << image
 			shop_prod.save
 		end
+	end
+
+	def update_google_meta(shopify_id, category)
+		p "Adding meta"
+
+		product = ShopifyAPI::Product.find(shopify_id)
+
+		current_meta = product.metafields.detect {|m| m.key == "google_product_type" }
+
+		current_meta = ShopifyAPI::Metafield.new unless !!current_meta
+
+		current_meta.key = "google_product_type"
+		current_meta.namespace = "google"
+		current_meta.value = category
+		current_meta.owner_resource = "product"
+		current_meta.owner_id = shopify_id
+		current_meta.value_type = "string"
+
+		p current_meta.save
+		p current_meta.errors.full_messages
 	end
 
 	def check_limit
