@@ -7,6 +7,11 @@ N = 4
 
 namespace :scrape do
 	namespace :bti do
+		task :update_all => :environment do
+			Rake::Task["scrape:bti:product_groups"].invoke
+			Rake::Task["scrape:bti:update_stock"].invoke
+		end
+
 		task :product_groups => :environment do
 
 			puts "-------------------- Getting Product Groups -------------------------"
@@ -23,7 +28,7 @@ namespace :scrape do
 
 			items = load_products(args.type)
 
-			items.each do |product|
+			items.find_each do |product|
 				Job.submit(BTI, :update_product, product.id)
 			end
 		end

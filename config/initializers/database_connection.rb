@@ -5,7 +5,7 @@ Rails.application.config.after_initialize do
     config = ActiveRecord::Base.configurations[Rails.env] ||
                 Rails.application.config.database_configuration[Rails.env]
     config['reaping_frequency'] = ENV['DB_REAP_FREQ'] || 10 
-    config['pool']              = ENV['DB_POOL']      || ENV['MAX_THREADS'] || 25
+    config['pool']              = ENV['DB_POOL']      || ENV['MAX_THREADS'] || 30
     ActiveRecord::Base.establish_connection(config)
   end
 end
