@@ -30,22 +30,28 @@ namespace :scrape do
 		end
 
 		task :product_groups => :environment do
+			stats = Sidekiq::Stats.new
 
 			puts "-------------------- Getting Product Groups -------------------------"
 
 			pages_to_scrape = (1..1300).to_a
 			
 			while !pages_to_scrape.empty?
+				sleep 300 if stats.enqueued > 5000
+
 				Job.submit(BTI, :scrape_product_groups, pages_to_scrape.pop(1))
 			end
 		end
 
 		task :update_stock, [:type] => :environment do |task, args|
+			stats = Sidekiq::Stats.new
 			puts "------------------------ Updating Products ------------------------"
 
 			items = load_products(args.type)
 
 			items.find_each do |product|
+				sleep 300 if stats.enqueued > 5000
+
 				Job.submit(BTI, :update_product, product.id)
 			end
 		end
