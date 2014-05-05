@@ -33,11 +33,9 @@ gem 'sekrets'
 # Used for interacting with APIs
 gem 'httparty'
 
-# Added threads to scraping rake tasks
-gem 'thread'
-
 # Added for heroku
 gem 'rails_12factor'
+gem 'heroku-api'
 
 # Added for new relic on heroku
 gem 'newrelic_rpm'

@@ -1,15 +1,32 @@
 require 'mechanize'
 require 'nokogiri'
 require 'open-uri'
-require 'thread/pool'
+require 'sidekiq/api'
 
 N = 4
 
 namespace :scrape do
 	namespace :bti do
 		task :update_all => :environment do
+			settings = Sekrets.settings_for(Rails.root.join('sekrets', 'ciphertext'))
+			heroku = Heroku::API.new(api_key: settings[:heroku_api]) 
+
+			heroku.post_ps_scale('bti-scraper', 'work', '1')
+
+			stats = Sidekiq::Stats.new
+
 			Rake::Task["scrape:bti:product_groups"].invoke
 			Rake::Task["scrape:bti:update_stock"].invoke
+
+			while stats.enqueued != 0
+				puts "Naping - enqueued #{stats.enqueued}"
+				sleep 300
+			end
+
+			heroku.post_ps_scale('bti-scraper', 'work', '0')
+
+			Rake::Task["shopify:product:create_new"].invoke
+			Rake::Task["shopify:product:update_stock"].invoke
 		end
 
 		task :product_groups => :environment do
