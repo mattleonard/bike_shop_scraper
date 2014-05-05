@@ -7,64 +7,16 @@ N = 4
 
 namespace :scrape do
 	namespace :bti do
-		task :update_all => :environment do
-			if Date.today.day.even?
-				p "Scraping Product Groups"
-				Rake::Task['scrape:bti:get_product_groups'].invoke
-				p "Scraping Update Stocks"
-				Rake::Task['scrape:bti:update_stock'].invoke
-				p "Updating Stock On Shopify"
-				Rake::Task["shopify:product:update_stock"].invoke
-				p "Creating New On Shopify"
-				Rake::Task["shopify:product:create_new"].invoke
-				p "Update Google Category"
-				Rake::Task["shopify:product:update_google_category"].invoke
+		task :product_groups => :environment do
+
+			puts "-------------------- Getting Product Groups -------------------------"
+
+			pages_to_scrape = (1..1300).to_a
+			
+			while !pages_to_scrape.empty?
+				p "Entering job"
+				Job.submit(ProductGroup, :scrape_product_groups, pages_to_scrape.pop(10))
 			end
-		end
-
-		task :get_product_groups => :environment do
-			pool = Thread.pool(N)
-
-			a = Mechanize.new
-
-			page = login(a)
-
-			puts "------------------------ Getting Product Groups -------------------------"
-
-			(1..1300).to_a.each do |page_num|
-				pool.process {
-					puts "Scraping page #{page_num}"
-
-					page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
-
-					raw_xml = page.parser
-
-					groupRows = raw_xml.css('.groupRow')
-
-					groupRows.each do |item|
-						bti_id = item.attributes.first.last.value
-												 .gsub('groupItemsDiv__num_','')
-												 .gsub('groupItemsDiv_','')
-						pg = ProductGroup.where(bti_id: bti_id).first_or_create
-						pg.name = item.css('.groupTitleOpen').text
-
-						puts "Updating #{pg.name} product group"
-
-						pg.description = ""
-
-						item.css('.groupBullets').css('li').each do |li|
-					    pg.description += li.text + '. '
-					  end
-
-					  item.css('.itemNo').each do |itemNo|
-					  	bti_id = itemNo.css('a').text.gsub('-','')
-							product = Product.where(bti_id: bti_id, product_group_id: pg.id).first_or_create
-					  end
-					  pg.save
-					end
-				}
-			end
-			pool.shutdown
 		end
 
 		task :update_stock, [:type] => :environment do |task, args|

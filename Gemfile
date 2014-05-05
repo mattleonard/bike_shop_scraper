@@ -57,13 +57,22 @@ gem 'shopify_api'
 # State machine
 gem 'state_machine'
 
+# Background Job Processing
+gem 'sidekiq'
+gem 'sinatra', '>= 1.3.0', :require => nil
+
+# Foreman
+gem 'foreman'
+
+# Thin server
+gem 'thin'
+
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false
 end
 
 group :development do
-  gem 'xray-rails'
 end
 
 # Use ActiveModel has_secure_password
