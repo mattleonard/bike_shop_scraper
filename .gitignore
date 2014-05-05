@@ -19,3 +19,4 @@
 /vendor/*
 .sekrets.key
 latest.dump
+dump.rdb

@@ -34,42 +34,4 @@ class ProductGroup < ActiveRecord::Base
 	def tags
 		self.categories.pluck(:name).join(', ')
 	end
-
-	def self.scrape_product_groups(pages)
-		a = Mechanize.new
-
-		page = BTI.login(a)
-
-		pages.to_a.each do |page_num|
-			puts "Scraping page #{page_num}"
-
-			page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
-
-			raw_xml = page.parser
-
-			groupRows = raw_xml.css('.groupRow')
-
-			groupRows.each do |item|
-				bti_id = item.attributes.first.last.value
-										 .gsub('groupItemsDiv__num_','')
-										 .gsub('groupItemsDiv_','')
-				pg = ProductGroup.where(bti_id: bti_id).first_or_create
-				pg.name = item.css('.groupTitleOpen').text
-
-				puts "Updating #{pg.name} product group"
-
-				pg.description = ""
-
-				item.css('.groupBullets').css('li').each do |li|
-			    pg.description += li.text + '. '
-			  end
-
-			  item.css('.itemNo').each do |itemNo|
-			  	bti_id = itemNo.css('a').text.gsub('-','')
-					product = Product.where(bti_id: bti_id, product_group_id: pg.id).first_or_create
-			  end
-			  pg.save
-			end
-		end
-	end
 end
