@@ -42,7 +42,9 @@ namespace :shopify do
 				p pg.name
 				category = pg.categories.where(parent: false).first.try(:google_product_category)
 				category ||= "Sporting Goods > Outdoor Recreation > Cycling"
-				update_google_meta(pg.shopify_id, category.downcase)
+				update_product_meta(pg.shopify_id, "google_product_type", category.downcase)
+				check_limit
+				update_product_meta(pg.shopify_id, "MPN", pg.products.first.mpn)
 				check_limit
 			end
 		end
@@ -242,24 +244,24 @@ namespace :shopify do
 		end
 	end
 
-	def update_google_meta(shopify_id, category)
+	def update_product_meta(shopify_id, key, value)
 		p "Adding meta"
 
 		product = ShopifyAPI::Product.find(shopify_id)
 
-		current_meta = product.metafields.detect {|m| m.key == "google_product_type" }
+		meta = product.metafields.detect {|m| m.key == key }
 
-		current_meta = ShopifyAPI::Metafield.new unless !!current_meta
+		meta = ShopifyAPI::Metafield.new unless !!meta
 
-		current_meta.key = "google_product_type"
-		current_meta.namespace = "google"
-		current_meta.value = category
-		current_meta.owner_resource = "product"
-		current_meta.owner_id = shopify_id
-		current_meta.value_type = "string"
+		meta.key ||= key
+		meta.namespace ||= key == "MPN" ? "global" : "google"
+		meta.value = value
+		meta.owner_resource = "product"
+		meta.owner_id = shopify_id
+		meta.value_type = "string"
 
-		p current_meta.save
-		p current_meta.errors.full_messages
+		p meta.save
+		p meta.errors.full_messages
 	end
 
 	def check_limit

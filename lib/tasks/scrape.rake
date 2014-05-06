@@ -27,6 +27,7 @@ namespace :scrape do
 
 			Rake::Task["shopify:product:create_new"].invoke
 			Rake::Task["shopify:product:update_stock"].invoke
+			Rake::Task["shopify:product:update_google_category"].invoke
 		end
 
 		task :product_groups => :environment do
