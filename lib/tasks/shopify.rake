@@ -253,12 +253,14 @@ namespace :shopify do
 
 		meta = ShopifyAPI::Metafield.new unless !!meta
 
-		meta.key ||= key
-		meta.namespace ||= key == "MPN" ? "global" : "google"
-		meta.value = value
-		meta.owner_resource = "product"
-		meta.owner_id = shopify_id
-		meta.value_type = "string"
+		attributes = meta.attributes
+
+		attributes["key"] ||= key
+		attributes["namespace"] ||= key == "MPN" ? "global" : "google"
+		attributes["value"] = value
+		attributes["owner_resource"] = "product"
+		attributes["owner_id"] = shopify_id
+		attributes["value_type"] = "string"
 
 		p meta.save
 		p meta.errors.full_messages
