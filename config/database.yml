@@ -18,7 +18,7 @@ development:
   adapter: postgresql
   encoding: unicode
   database: bti_scraper_development
-  pool: 5
+  pool: 30
   username: mattleonard
   password:
 

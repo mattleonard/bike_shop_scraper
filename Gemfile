@@ -33,11 +33,9 @@ gem 'sekrets'
 # Used for interacting with APIs
 gem 'httparty'
 
-# Added threads to scraping rake tasks
-gem 'thread'
-
 # Added for heroku
 gem 'rails_12factor'
+gem 'heroku-api'
 
 # Added for new relic on heroku
 gem 'newrelic_rpm'
@@ -57,13 +55,22 @@ gem 'shopify_api'
 # State machine
 gem 'state_machine'
 
+# Background Job Processing
+gem 'sidekiq'
+gem 'sinatra', '>= 1.3.0', :require => nil
+
+# Foreman
+gem 'foreman'
+
+# Thin server
+gem 'thin'
+
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
   gem 'sdoc', require: false
 end
 
 group :development do
-  gem 'xray-rails'
 end
 
 # Use ActiveModel has_secure_password
