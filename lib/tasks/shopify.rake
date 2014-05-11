@@ -48,6 +48,23 @@ namespace :shopify do
 				check_limit
 			end
 		end
+		task :remove_archived => :environment do
+			shopify_auth()
+
+			ProductGroup.need_to_remove.each do |pg|
+				check_limit
+
+				begin
+					puts "Removing #{pg.name}"
+					ShopifyAPI::Product.find(pg.shopify_id).destroy	
+					pg.update(on_shopify: false)
+				rescue ActiveResource::ResourceNotFound => e
+					puts "Not found id=#{pg.shopify_id}"
+					pg.update(on_shopify: false)
+				end
+
+			end
+		end
 	end
 
 	def shopify_auth
