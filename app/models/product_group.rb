@@ -9,6 +9,8 @@ class ProductGroup < ActiveRecord::Base
 
 	scope :alphabetical, -> { order(:name) }
 
+	scope :live, -> { where(status: ['scraped','active']) }
+
 	scope :need_to_remove, -> {
 		where(on_shopify: true, status: "archived").
 		where("shopify_id IS NOT NULL")

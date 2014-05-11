@@ -7,6 +7,7 @@ class Product < ActiveRecord::Base
 	has_many :variations, dependent: :destroy
 
 	scope :alphabetical, -> { order(:name) }
+	scope :live, -> { where(status: ['scraped','active']) }
 	scope :active, -> { where(status: "active") }
 	scope :on_shopify_or_needed, -> { where('shopify_id IS NOT NULL OR status = ?', 'active') }
 	scope :need_to_scrape, -> { 
