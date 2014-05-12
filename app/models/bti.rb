@@ -34,7 +34,9 @@ class BTI
 				bti_id = item.attributes.first.last.value
 										 .gsub('groupItemsDiv__num_','')
 										 .gsub('groupItemsDiv_','')
-				pg = ProductGroup.live.where(bti_id: bti_id).first_or_create
+				puts pg = ProductGroup.live.where(bti_id: bti_id).first
+				pg ||= ProductGroup.create(bti_id: bti_id)
+				puts pg.errors.full_messages
 				pg.name = item.css('.groupTitleOpen').text
 
 				puts "Updating #{pg.name} product group"
@@ -47,7 +49,9 @@ class BTI
 
 			  item.css('.itemNo').each do |itemNo|
 			  	bti_id = itemNo.css('a').text.gsub('-','')
-					product = Product.live.where(bti_id: bti_id, product_group_id: pg.id).first_or_create
+					puts product = Product.live.where(bti_id: bti_id, product_group_id: pg.id).first
+					product ||= Product.create(bti_id: bti_id, product_group_id: pg.id)
+					puts product.errors.full_messages
 			  end
 			  pg.save
 			end
