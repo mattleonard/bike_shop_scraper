@@ -28,7 +28,7 @@ namespace :shopify do
 		task :update_stock => :environment do
 			shopify_auth()
 
-			Product.where('shopify_id IS NOT NULL AND status = ?', 'active').
+			Product.where('on_shopify = ? AND shopify_id IS NOT NULL AND status = ?', true, 'active').
 							complete.each do |p|
 				update_stock_and_price(p.shopify_id, p)
 				check_limit
