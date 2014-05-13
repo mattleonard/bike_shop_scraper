@@ -218,7 +218,7 @@ namespace :shopify do
 			
 		price = product.sale_price == 0 ? product.regular_price : product.sale_price
 		price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
-		price = [price, product.msrp_price].min unless product.msrp_price == 0
+		price = [price, product.msrp_price].max unless product.msrp_price == 0
 
 		variant.sku = product.mpn
 		variant.price = price
@@ -236,7 +236,7 @@ namespace :shopify do
 
 		price = product.sale_price == 0 ? product.regular_price : product.sale_price
 		price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
-		price = [price, product.msrp_price].min unless product.msrp_price == 0
+		price = [price, product.msrp_price].max unless product.msrp_price == 0
 
 		variant.sku = product.mpn
 		variant.price = price
