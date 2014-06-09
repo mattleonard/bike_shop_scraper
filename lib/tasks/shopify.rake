@@ -32,6 +32,7 @@ namespace :shopify do
 							complete.each do |p|
 				update_stock_and_price(p.shopify_id, p)
 				check_limit
+				p.update(on_shopify: true)
 			end
 		end
 
@@ -46,6 +47,12 @@ namespace :shopify do
 				check_limit
 				update_product_meta(pg.shopify_id, "MPN", pg.products.first.mpn)
 				check_limit
+				update_product_meta(pg.shopify_id, "MPN", pg.products.first.mpn)
+				check_limit
+				update_product_meta(pg.shopify_id, "gender", "unisex")
+				check_limit
+				update_product_meta(pg.shopify_id, "age_group", "adult")
+
 			end
 		end
 		task :remove_archived => :environment do
@@ -218,7 +225,9 @@ namespace :shopify do
 			
 		price = product.sale_price == 0 ? product.regular_price : product.sale_price
 		price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
-		price = [price, product.msrp_price].max unless product.msrp_price == 0
+
+		price = product.msrp_price unless product.msrp_price == 0
+		price = product.map_price unless product.map_price == 0
 
 		variant.sku = product.mpn
 		variant.price = price
@@ -236,7 +245,9 @@ namespace :shopify do
 
 		price = product.sale_price == 0 ? product.regular_price : product.sale_price
 		price = [price * 1.429 + 0.5, price + 7.5 + price * 0.029].max
-		price = [price, product.msrp_price].max unless product.msrp_price == 0
+
+		price = product.msrp_price unless product.msrp_price == 0
+		price = product.map_price unless product.map_price == 0
 
 		variant.sku = product.mpn
 		variant.price = price

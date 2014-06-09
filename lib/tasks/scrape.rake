@@ -39,10 +39,14 @@ namespace :scrape do
 			pages_to_scrape = (1..1300).to_a
 			
 			while !pages_to_scrape.empty?
-				sleep 300 if stats.enqueued > 5000
-
 				Job.submit(BTI, :scrape_product_groups, pages_to_scrape.pop(1))
 			end
+
+			while stats.enqueued > 0
+				sleep 60 
+			end
+
+			remove_duplicates(ProductGroup.all)
 		end
 
 		task :update_stock, [:type] => :environment do |task, args|
@@ -52,10 +56,14 @@ namespace :scrape do
 			items = load_products(args.type)
 
 			items.find_each do |product|
-				sleep 300 if stats.enqueued > 5000
-
 				Job.submit(BTI, :update_product, product.id)
 			end
+
+			while stats.enqueued > 0
+				sleep 60 
+			end
+
+			remove_duplicates(Product.all)
 		end
 	end
 
@@ -70,5 +78,17 @@ namespace :scrape do
 				end
 
 		items
+	end
+
+	def remove_duplicates(items)
+		seen = []
+		#sort by created date and iterate
+		items.find_each do |obj| 
+		  if seen.map(&:bti_id).include? obj.bti_id #check if the name has been seen already
+		    obj.destroy!
+		  else
+		    seen << obj #if not, add it to the seen array
+		  end
+		end
 	end
 end

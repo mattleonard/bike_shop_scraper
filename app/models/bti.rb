@@ -1,6 +1,8 @@
 class BTI
-	def self.login(mech)
+	def self.login
 		puts "------------------------ Logging In -------------------------------"
+
+		mech = Mechanize.new
 
 		login = Sekrets.settings_for(Rails.root.join('sekrets', 'ciphertext'))
 
@@ -13,18 +15,19 @@ class BTI
 		login_form['user[user_name]'] = login[:u_name]
 		login_form['user[password]'] = login[:pass]
 		page = mech.submit(login_form)
-		page
+		[mech, page]
 	end
 
 	def self.scrape_product_groups(pages)
-		a = Mechanize.new
+		login_details = BTI.login
 
-		page = BTI.login(a)
+		mech = login_details[0]
+		page = login_details[1]
 
 		pages.to_a.each do |page_num|
 			puts "Scraping page #{page_num}"
 
-			page = a.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
+			page = mech.get("https://bti-usa.com/public/quicksearch/+/?page=#{page_num}")
 
 			raw_xml = page.parser
 
@@ -57,19 +60,19 @@ class BTI
 	end
 
 	def self.update_product(product_id)
-		a = Mechanize.new
+		login_details = BTI.login
 
-		BTI.login(a)
+		mech = login_details[0]
+		page = login_details[1]
 
 		product = Product.find(product_id)
 
-		parse_product_info(a, product)
+		parse_product_info(mech, page, product)
 	end
 
-	def BTI.parse_product_info(a, product)
-		page = BTI.login(a)
+	def BTI.parse_product_info(mech, page, product)
 
-		page = a.get("https://bti-usa.com/public/item/#{product.bti_id}")
+		page = mech.get("https://bti-usa.com/public/item/#{product.bti_id}")
 
 		raw_xml = page.parser
 
@@ -136,20 +139,23 @@ class BTI
 
 		price = 0.0
 		msrp = 0.0
+		map = 0.0
 		sale = 0.0
 		stock = 0
 
 		(0..100).to_a.each do |i|
 			unless tds[i].nil?
 				parsed_item = parse_noko(tds[i])
-				
-				case parsed_item
+
+				case parsed_item.gsub(" ", "")
 				when "price:"
 					price = parse_noko(tds[i+1], true).to_f
 				when "onsale!"
 					sale = parse_noko(tds[i+1], true).to_f
 				when "MSRP:"
 					msrp = parse_noko(tds[i+1], true).to_f
+				when "minimumadvertisedprice:"
+					map = parse_noko(tds[i+1], true).to_f
 				when "remaining:"
 					stock = parse_noko(tds[i+1], true).to_i
 				end
@@ -158,6 +164,7 @@ class BTI
 
 		item.name = name
 		item.msrp_price = msrp
+		item.map_price = map
 		item.sale_price = sale
 		item.regular_price = price
 		item.stock = stock

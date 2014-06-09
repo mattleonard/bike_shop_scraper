@@ -1,0 +1,3 @@
+# Bicycle Technologies International (BTI) Unoffcial API
+
+Since BTI has no official API, I built a webscraper that can be used as one. This is a Ruby On Rails app. I was going to refactor it but I am no longer using BTI so I have no login. If you would like me to update it for you, feel free to shoot me an email at matt@turbosoul.com. This web app also pushes to Shopify via their API. Be careful with this. I got shutdown for pushing all
