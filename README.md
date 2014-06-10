@@ -1,16 +1,18 @@
-# Bicycle Technologies International (BTI) Unoffcial API
+# Web Scraper For Bike Distributor
+## Pushes products to shopify
 
-Since BTI has no official API, I built a webscraper that can be used as one. This is a Ruby On Rails app. I was going to refactor it but I am no longer using BTI so I have no login. If you would like me to update it for you, feel free to shoot me an email at mattleoanrdco@gmail.com. This web app also pushes to Shopify via their API. Be careful with this. I got shutdown for pushing all products public.
+I was having difficulty maintaining the stock between my bike shop and the distributors inventory.
+So I built a webscraper that scraped all 23,000 products and pushed them to Shopify via their API. It would also update the stock and new product every night. I was going to refactor it but I am no longer using my distributor. If you would like me to update it for you, feel free to shoot me an email at mattleonardco@gmail.com. Be careful with this.
 
 Setup
 ----------
-1. Follow instructions on how to setup Sekrets key with you BTI log in info:
+1. Follow instructions on how to setup Sekrets key with you distributor log in info:
 
 2. Put the following in your sekrets/cipertext file
 ```yaml
-    :cust_id:         YOUR BTI CUSTOMER ID
-    :u_name:          YOUR BTI USERNAME
-    :pass:            YOUR BTI PASSWORD
+    :cust_id:         YOUR CUSTOMER ID
+    :u_name:          YOUR USERNAME
+    :pass:            YOUR PASSWORD
     :shopify_key:     YOUR SHOPIFY KEY
     :shopify_secret:  YOUR SHOPIFY SECRET KEY
     :heroku_api:      HEROKU API KEY
@@ -19,13 +21,13 @@ Setup
 Rake Tasks
 ----------
 
-####BTI
+####Distributor
 
-Scrape BTI Product Group
-`bundle exec rake scrape:bti:product_groups`
+Scrape Product Group
+`bundle exec rake scrape:distributor:product_groups`
 
-Scrape BTI Products
-`bundle exec rake scrape:bti:update_stock`
+Scrape Products
+`bundle exec rake scrape:distributor:update_stock`
 
 ####Shopify
 

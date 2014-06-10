@@ -6,17 +6,17 @@ require 'sidekiq/api'
 N = 4
 
 namespace :scrape do
-	namespace :bti do
+	namespace :distributor do
 		task :update_all => :environment do
 			settings = Sekrets.settings_for(Rails.root.join('sekrets', 'ciphertext'))
-			heroku = Heroku::API.new(api_key: settings[:heroku_api]) 
+			heroku = Heroku::API.new(api_key: settings[:heroku_api])
 
 			heroku.post_ps_scale('bti-scraper', 'work', '1')
 
 			stats = Sidekiq::Stats.new
 
-			Rake::Task["scrape:bti:product_groups"].invoke
-			Rake::Task["scrape:bti:update_stock"].invoke
+			Rake::Task["scrape:distributor:product_groups"].invoke
+			Rake::Task["scrape:distributor:update_stock"].invoke
 
 			while stats.enqueued != 0
 				puts "Naping - enqueued #{stats.enqueued}"
@@ -37,13 +37,13 @@ namespace :scrape do
 			puts "-------------------- Getting Product Groups -------------------------"
 
 			pages_to_scrape = (1..1300).to_a
-			
+
 			while !pages_to_scrape.empty?
 				Job.submit(BTI, :scrape_product_groups, pages_to_scrape.pop(1))
 			end
 
 			while stats.enqueued > 0
-				sleep 60 
+				sleep 60
 			end
 
 			remove_duplicates(ProductGroup.all)
@@ -60,7 +60,7 @@ namespace :scrape do
 			end
 
 			while stats.enqueued > 0
-				sleep 60 
+				sleep 60
 			end
 
 			remove_duplicates(Product.all)
@@ -68,7 +68,7 @@ namespace :scrape do
 	end
 
 	def load_products(type)
-		items = 
+		items =
 				if type == "new"
 					Product.where('name IS NULL').need_to_scrape
 				elsif type == "price"
@@ -83,7 +83,7 @@ namespace :scrape do
 	def remove_duplicates(items)
 		seen = []
 		#sort by created date and iterate
-		items.find_each do |obj| 
+		items.find_each do |obj|
 		  if seen.map(&:bti_id).include? obj.bti_id #check if the name has been seen already
 		    obj.destroy!
 		  else
