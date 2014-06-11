@@ -4,6 +4,8 @@
 I was having difficulty maintaining the stock between my bike shop and the distributors inventory.
 So I built a webscraper that scraped all 23,000 products and pushed them to Shopify via their API. It would also update the stock and new product every night. I was going to refactor it but I am no longer using my distributor. If you would like me to update it for you, feel free to shoot me an email at mattleonardco@gmail.com. Be careful with this.
 
+More in depth article on why I built this: [here](http://blog.mattl.co/how-i-automated-my-bike-shop)
+
 Setup
 ----------
 1. Follow instructions on how to setup Sekrets key with you distributor log in info:
